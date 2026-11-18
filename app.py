@@ -2,7 +2,7 @@
 import os
 import re
 import requests
-from flask import Flask, request
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
@@ -24,11 +24,13 @@ def telegram(method, data):
         result = response.json()
     except Exception as error:
         raise RuntimeError(
-            f"Connection error: {type(error).__name__}"
+            f"Telegram connection error: {type(error).__name__}"
         ) from None
 
     if not result.get("ok"):
-        raise RuntimeError(result.get("description", "Telegram error"))
+        raise RuntimeError(
+            result.get("description", "Telegram API error")
+        )
 
     return result
 
@@ -50,7 +52,7 @@ def safe_send(chat_id, text):
 
 def setup_webhook():
     if not BASE_URL:
-        print("Missing Render URL")
+        print("Render URL is missing")
         return
 
     try:
@@ -58,14 +60,14 @@ def setup_webhook():
             "url": f"{BASE_URL}/webhook/{WEBHOOK_SECRET}",
             "secret_token": WEBHOOK_SECRET
         })
-        print("Webhook configured")
+        print("Webhook configured successfully")
     except Exception as error:
         print(f"Webhook setup failed: {error}")
 
 
 @app.route("/")
 def home():
-    return "Бот работает."
+    return render_template("index.html")
 
 
 @app.route("/webhook/<secret>", methods=["POST"])
@@ -93,80 +95,96 @@ def webhook(secret):
     if not user_id or not chat_id:
         return "OK", 200
 
-    # Запуск бота владельцем
+    # Приветствие администратора
     if user_id == ADMIN_ID and text.startswith("/start"):
         safe_send(
             chat_id,
-            "Бот запущен. Все новые обращения будут приходить сюда."
+            "Привет, Егор! ❤️\n\n"
+            "Бот «Егор, помоги мне!» работает.\n"
+            "Все новые обращения будут приходить сюда."
         )
         return "OK", 200
 
-    # Запуск бота пользователем
+    # Приветствие пользователя
     if text.startswith("/start"):
         safe_send(
             chat_id,
-            "Привет.\n\n"
-            "Это личный бот Егора.\n\n"
-            "Можешь написать сюда о том, что тебя беспокоит, "
-            "рассказать о своей ситуации или просто поговорить.\n\n"
-            "Егор прочитает сообщение и ответит, когда сможет.\n\n"
-            "Твои сообщения увидит Егор. Не отправляй пароли "
-            "и другие секретные данные.\n\n"
-            "Если тебе угрожает непосредственная опасность, "
-            "обратись в экстренную службу или к человеку, "
-            "которому доверяешь."
+            "Привет! ❤️\n\n"
+            "Добро пожаловать в «Егор, помоги мне!».\n\n"
+            "Здесь можно рассказать о том, что тебя тревожит, "
+            "поделиться переживаниями или просто поговорить.\n\n"
+            "Егор прочитает твоё сообщение и постарается поддержать тебя.\n\n"
+            "Можешь писать свободно. Твои сообщения увидит Егор.\n\n"
+            "Это не профессиональная психологическая и не экстренная "
+            "помощь. Если тебе угрожает опасность, обратись "
+            "в местную экстренную службу или к близкому человеку."
         )
         return "OK", 200
 
-    # Ответ Егора пользователю
+    # Ответ администратора пользователю
     if user_id == ADMIN_ID:
         replied = message.get("reply_to_message")
 
         if replied and text:
             original = replied.get("text", "")
+
             match = re.search(
-                r"^ID: (\d+)$",
+                r"^🆔 ID: (\d+)$",
                 original,
                 re.MULTILINE
             )
 
             if match:
                 target_id = int(match.group(1))
-                safe_send(target_id, text)
+                result = safe_send(target_id, text)
+
+                if result:
+                    print(f"Reply delivered to {target_id}")
+                else:
+                    safe_send(
+                        ADMIN_ID,
+                        "Не удалось отправить ответ пользователю 😔"
+                    )
 
         return "OK", 200
 
-    # Игнорируем команды
+    # Игнорирование команд
     if text.startswith("/"):
         return "OK", 200
 
-    # Получаем обращение
+    # Новое обращение
     if text:
         name = sender.get("first_name", "Без имени")
         username = sender.get("username")
-
         username_text = f"@{username}" if username else "не указан"
 
         report = (
-            f"ID: {user_id}\n"
-            f"Имя: {name}\n"
-            f"Username: {username_text}\n"
-            "--------------------\n\n"
+            "📩 НОВОЕ ОБРАЩЕНИЕ\n\n"
+            f"👤 Имя: {name}\n"
+            f"🔗 Username: {username_text}\n"
+            f"🆔 ID: {user_id}\n"
+            "━━━━━━━━━━━━━━\n\n"
             f"{text}"
         )
 
         result = safe_send(ADMIN_ID, report)
 
-        if not result:
+        if result:
             safe_send(
                 chat_id,
-                "Не удалось доставить сообщение. Попробуй позже."
+                "Твоё сообщение доставлено Егору ❤️\n\n"
+                "Он увидит его и ответит, когда сможет."
             )
-
+        else:
+            safe_send(
+                chat_id,
+                "Не удалось доставить сообщение Егору 😔\n"
+                "Попробуй немного позже."
+            )
     else:
         safe_send(
             chat_id,
-            "Пока можно отправлять только текстовые сообщения."
+            "Пока бот принимает только текстовые сообщения ❤️"
         )
 
     return "OK", 200
