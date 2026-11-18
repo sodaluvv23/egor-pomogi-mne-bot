@@ -47,9 +47,25 @@ def init_db():
         db.execute("""
             CREATE TABLE IF NOT EXISTS admin_replies (
                 admin_message_id INTEGER PRIMARY KEY,
-                user_id INTEGER NOT NULL
+                user_id INTEGER NOT NULL,
+                source TEXT NOT NULL DEFAULT 'telegram'
             )
         """)
+
+        # Миграция старой базы данных:
+        # добавляем поле source, если его ещё нет.
+        columns = [
+            row["name"]
+            for row in db.execute(
+                "PRAGMA table_info(admin_replies)"
+            ).fetchall()
+        ]
+
+        if "source" not in columns:
+            db.execute("""
+                ALTER TABLE admin_replies
+                ADD COLUMN source TEXT NOT NULL DEFAULT 'telegram'
+            """)
 
 
 def save_message(user_id, role, text):
@@ -63,29 +79,36 @@ def save_message(user_id, role, text):
         )
 
 
-def save_reply_link(admin_message_id, user_id):
+def save_reply_link(admin_message_id, user_id, source="telegram"):
     with get_db() as db:
         db.execute(
             """
             INSERT OR REPLACE INTO admin_replies
-            (admin_message_id, user_id)
-            VALUES (?, ?)
+            (admin_message_id, user_id, source)
+            VALUES (?, ?, ?)
             """,
-            (admin_message_id, user_id)
+            (admin_message_id, user_id, source)
         )
 
 
-def find_reply_user(admin_message_id):
+def find_reply_link(admin_message_id):
     with get_db() as db:
         result = db.execute(
             """
-            SELECT user_id FROM admin_replies
+            SELECT user_id, source
+            FROM admin_replies
             WHERE admin_message_id = ?
             """,
             (admin_message_id,)
         ).fetchone()
 
-    return result["user_id"] if result else None
+    if not result:
+        return None
+
+    return {
+        "user_id": result["user_id"],
+        "source": result["source"]
+    }
 
 
 def get_user_replies(user_id, after_id=0):
@@ -206,7 +229,7 @@ def validate_init_data(init_data):
 
 
 # -----------------------------
-# WEBHOOK
+# WEBHOOK SETUP
 # -----------------------------
 
 def setup_webhook():
@@ -296,7 +319,12 @@ def api_message():
 
     admin_message_id = result["result"]["message_id"]
 
-    save_reply_link(admin_message_id, user_id)
+    # Помечаем обращение как отправленное из приложения.
+    save_reply_link(
+        admin_message_id,
+        user_id,
+        source="app"
+    )
 
     return jsonify({
         "ok": True,
@@ -342,12 +370,15 @@ def api_messages():
 @app.route("/webhook/<secret>", methods=["POST"])
 def webhook(secret):
 
-    if secret != WEBHOOK_SECRET:
+    if not hmac.compare_digest(secret, WEBHOOK_SECRET):
         return "Forbidden", 403
 
-    if request.headers.get(
-        "X-Telegram-Bot-Api-Secret-Token"
-    ) != WEBHOOK_SECRET:
+    if not hmac.compare_digest(
+        request.headers.get(
+            "X-Telegram-Bot-Api-Secret-Token", ""
+        ),
+        WEBHOOK_SECRET
+    ):
         return "Forbidden", 403
 
     update = request.get_json(silent=True) or {}
@@ -364,7 +395,9 @@ def webhook(secret):
     if not user_id or not chat_id:
         return "OK", 200
 
+    # -------------------------
     # ADMIN START
+    # -------------------------
 
     if user_id == ADMIN_ID and text.startswith("/start"):
         safe_send(
@@ -377,7 +410,9 @@ def webhook(secret):
         )
         return "OK", 200
 
+    # -------------------------
     # USER START
+    # -------------------------
 
     if text.startswith("/start"):
         safe_send(
@@ -386,7 +421,7 @@ def webhook(secret):
             "Добро пожаловать в «Егор, помоги мне!».\n\n"
             "Здесь можно рассказать о том, что тебя тревожит, "
             "поделиться переживаниями или просто поговорить.\n\n"
-            "Егор прочитает твоё сообщение и постарается поддержать тебя.\n\n"
+            "Егор прочитает твоё сообщение,поговорит с тобой и поможет.\n\n"
             "Можешь писать свободно. Твои сообщения увидит Егор.\n\n"
             "Это не профессиональная психологическая и не экстренная "
             "помощь. Если тебе угрожает опасность, обратись "
@@ -394,17 +429,26 @@ def webhook(secret):
         )
         return "OK", 200
 
+    # -------------------------
     # ADMIN REPLY
+    # -------------------------
 
     if user_id == ADMIN_ID:
         replied = message.get("reply_to_message")
 
         if replied and text:
             admin_message_id = replied.get("message_id")
+            link = find_reply_link(admin_message_id)
 
-            target_id = find_reply_user(admin_message_id)
+            target_id = None
+            source = "telegram"
 
-            # Совместимость со старыми сообщениями
+            if link:
+                target_id = link["user_id"]
+                source = link["source"]
+
+            # Совместимость со старыми сообщениями,
+            # у которых не было сохранённой связи.
             if not target_id:
                 original = (
                     replied.get("text")
@@ -422,25 +466,45 @@ def webhook(secret):
                     target_id = int(match.group(1))
 
             if target_id:
-                result = safe_send(target_id, text)
-
-                if result:
+                if source == "app":
+                    # ВАЖНО:
+                    # Для Mini App не отправляем ответ
+                    # в личный Telegram пользователя.
+                    # Сохраняем его для чата приложения.
                     save_message(target_id, "admin", text)
-                    print(f"Reply delivered to {target_id}")
-                else:
-                    safe_send(
-                        ADMIN_ID,
-                        "Не удалось отправить ответ пользователю 😔"
+
+                    print(
+                        f"Mini App reply saved for user {target_id}"
                     )
+
+                else:
+                    # Обычные сообщения боту по-прежнему
+                    # получают ответы в Telegram.
+                    result = safe_send(target_id, text)
+
+                    if result:
+                        save_message(target_id, "admin", text)
+                        print(
+                            f"Telegram reply delivered to {target_id}"
+                        )
+                    else:
+                        safe_send(
+                            ADMIN_ID,
+                            "Не удалось отправить ответ пользователю 😔"
+                        )
 
         return "OK", 200
 
+    # -------------------------
     # IGNORE COMMANDS
+    # -------------------------
 
     if text.startswith("/"):
         return "OK", 200
 
+    # -------------------------
     # ORDINARY TELEGRAM MESSAGE
+    # -------------------------
 
     if text:
         name = sender.get("first_name", "Без имени")
@@ -450,7 +514,7 @@ def webhook(secret):
         save_message(user_id, "user", text)
 
         report = (
-            "📩 НОВОЕ ОБРАЩЕНИЕ\n\n"
+            "📩 НОВОЕ ОБРАЩЕНИЕ ИЗ TELEGRAM\n\n"
             f"👤 Имя: {name}\n"
             f"🔗 Username: {username_text}\n"
             f"🆔 ID: {user_id}\n"
@@ -463,7 +527,8 @@ def webhook(secret):
         if result:
             save_reply_link(
                 result["result"]["message_id"],
-                user_id
+                user_id,
+                source="telegram"
             )
 
             safe_send(
