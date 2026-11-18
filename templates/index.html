@@ -3,1248 +3,1550 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#f8f7f4">
-<title>Егор, помоги мне! 💚</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#f7f5ff">
+<title>Егор, помоги мне! ❤️</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
 :root {
-  --bg:#f8f7f4;
-  --white:#ffffff;
-  --green:#315c43;
-  --green-light:#e5f1e5;
-  --text:#293a30;
-  --muted:#929b92;
-  --line:#eeeee9;
-  --shadow:0 12px 32px rgba(43,65,48,.07);
-  --radius:24px;
+    --bg: #f7f5ff;
+    --surface: rgba(255,255,255,.88);
+    --text: #25233b;
+    --muted: #85839a;
+    --purple: #8172ed;
+    --pink: #ff8eb5;
+    --green: #74c9a5;
+    --yellow: #ffd889;
+    --border: rgba(117,105,180,.12);
+    --shadow: 0 15px 45px rgba(80,65,140,.09);
 }
-* {box-sizing:border-box}
-html {scroll-behavior:smooth}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  margin:0;
-  background:
-    radial-gradient(ellipse at 0% 0%,#e4f0e4 0,transparent 32%),
-    radial-gradient(ellipse at 100% 25%,#f9e8e4 0,transparent 28%),
-    radial-gradient(ellipse at 15% 80%,#eee8f7 0,transparent 25%),
-    var(--bg);
-  color:var(--text);
-  font-family:'DM Sans',sans-serif;
-  padding-bottom:110px;
-  overflow-x:hidden;
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Manrope', sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 5% 5%, #ffe5f0 0, transparent 28%),
+        radial-gradient(circle at 95% 10%, #e6e2ff 0, transparent 30%),
+        radial-gradient(circle at 50% 100%, #e1f8ed 0, transparent 35%),
+        var(--bg);
 }
-button,textarea {font:inherit}
+
+button, textarea {
+    font: inherit;
+}
+
 button {
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
+    cursor: pointer;
 }
-.app {max-width:570px;margin:auto;padding:20px 19px 35px}
 
-/* HEADER */
-.top {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:23px;
+.app {
+    width: 100%;
+    max-width: 540px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 22px 17px 110px;
+    position: relative;
 }
-.brand {display:flex;align-items:center;gap:12px}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
 .logo {
-  width:48px;height:48px;
-  border-radius:18px;
-  display:grid;place-items:center;
-  color:white;font-size:25px;
-  background:linear-gradient(145deg,#68a879,#315b43);
-  box-shadow:0 8px 18px #315b4335;
-  position:relative;
+    width: 45px;
+    height: 45px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    font-size: 23px;
+    background: linear-gradient(135deg,#ffb5cf,#b5aaff);
+    box-shadow: 0 7px 20px rgba(176,137,220,.25);
 }
-.logo:after {
-  content:"";
-  position:absolute;
-  inset:-4px;
-  border:1px solid #6d9c7950;
-  border-radius:21px;
-}
+
 .brand-title {
-  font:800 14px Manrope;
-  letter-spacing:-.3px;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -.4px;
 }
-.brand-sub {
-  font-size:10px;
-  color:var(--muted);
-  margin-top:4px;
+
+.brand-subtitle {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
 }
+
 .online {
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:9px 12px;
-  background:#e8f2e7;
-  color:#527557;
-  border:1px solid #dcebd9;
-  border-radius:30px;
-  font-size:10px;
-  font-weight:800;
-}
-.dot {
-  width:7px;height:7px;
-  border-radius:50%;
-  background:#79b47a;
-  box-shadow:0 0 0 4px #79b47a20;
-  animation:pulse 2s infinite;
-}
-@keyframes pulse {
-  50% {box-shadow:0 0 0 7px #79b47a08}
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #56aa87;
+    font-size: 11px;
+    font-weight: 800;
+    background: #e8f8ef;
+    padding: 8px 11px;
+    border-radius: 30px;
 }
 
-/* HERO */
-.hero {
-  color:white;
-  background:linear-gradient(135deg,#588b65 0%,#315b43 58%,#284c39 100%);
-  border-radius:30px;
-  padding:26px 23px 25px;
-  margin-bottom:18px;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 18px 38px #315b4330;
-}
-.hero:before {
-  content:"";
-  position:absolute;
-  width:245px;height:245px;
-  border:1px solid #ffffff20;
-  border-radius:50%;
-  right:-100px;top:-130px;
-}
-.hero:after {
-  content:"";
-  position:absolute;
-  width:175px;height:175px;
-  border:1px solid #ffffff20;
-  border-radius:50%;
-  right:-45px;top:-65px;
-}
-.hero-top {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  position:relative;
-  z-index:1;
-}
-.hero-tag {
-  background:#ffffff20;
-  border:1px solid #ffffff27;
-  padding:8px 11px;
-  border-radius:30px;
-  color:#e9f4e8;
-  font-size:9px;
-  font-weight:800;
-  letter-spacing:.6px;
-}
-.hero-star {font-size:21px;opacity:.85}
-.hero h1 {
-  font:800 clamp(29px,7vw,37px)/1.17 Manrope;
-  letter-spacing:-1.5px;
-  max-width:340px;
-  margin:21px 0 12px;
-  position:relative;
-  z-index:1;
-}
-.hero p {
-  color:#e1ede0;
-  font-size:12px;
-  line-height:1.8;
-  max-width:305px;
-  margin:0 0 21px;
-  position:relative;
-  z-index:1;
-}
-.hero-button {
-  border:0;
-  background:linear-gradient(135deg,#fff9ec,#f2e9d8);
-  color:#315b43;
-  border-radius:15px;
-  padding:14px 18px;
-  font-size:11px;
-  font-weight:800;
-  box-shadow:0 6px 17px #203d2c35;
-  position:relative;
-  z-index:1;
-  transition:.2s;
-}
-.hero-button:active {transform:scale(.96)}
-.hero-decoration {
-  position:absolute;
-  right:20px;
-  bottom:18px;
-  font-size:53px;
-  opacity:.22;
-  transform:rotate(-12deg);
-  z-index:0;
+.online-dot {
+    width: 7px;
+    height: 7px;
+    background: #54c58e;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(84,197,142,.12);
 }
 
-/* WELCOME */
-.welcome {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:3px 4px 19px;
-  color:#858e84;
-  font-size:11px;
-}
-.welcome strong {color:var(--green)}
-.welcome-icon {font-size:19px}
-
-/* QUOTE */
-.quote {
-  border-radius:23px;
-  padding:18px 19px;
-  background:linear-gradient(120deg,#fff0e8,#f7eaf1 55%,#f0eafa);
-  border:1px solid #f1e6e8;
-  margin-bottom:27px;
-  position:relative;
-  overflow:hidden;
-}
-.quote:after {
-  content:"🌷";
-  position:absolute;
-  right:15px;
-  bottom:8px;
-  font-size:42px;
-  opacity:.3;
-  transform:rotate(-17deg);
-}
-.quote-mark {
-  color:#c68e8a;
-  font:36px Georgia;
-  line-height:1;
-}
-.quote p {
-  color:#705858;
-  font:700 13px/1.7 Manrope;
-  margin:4px 0 8px;
-  max-width:320px;
-}
-.quote small {color:#a48a89;font-size:10px}
-
-/* SECTION TITLES */
-.section-head {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin:25px 2px 14px;
-}
-.section-head h2 {
-  font:800 17px Manrope;
-  margin:0;
-  letter-spacing:-.5px;
-}
-.section-head span {
-  color:var(--muted);
-  font-size:10px;
+.page {
+    display: none;
+    animation: appear .28s ease;
 }
 
-/* ACTION CARDS */
-.actions {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.action {
-  text-align:left;
-  border:1px solid #eeeeea;
-  background:#ffffffeb;
-  border-radius:23px;
-  padding:16px 15px;
-  min-height:144px;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 7px 20px #344b370a;
-  transition:transform .2s,box-shadow .2s;
-}
-.action:active {
-  transform:scale(.97);
-  box-shadow:0 2px 8px #344b3715;
-}
-.action:after {
-  content:"";
-  position:absolute;
-  width:95px;height:95px;
-  border-radius:50%;
-  right:-42px;bottom:-48px;
-  background:var(--decor);
-  opacity:.6;
-}
-.action:nth-child(1) {--decor:#dceede}
-.action:nth-child(2) {--decor:#f8e4d8}
-.action:nth-child(3) {--decor:#e8dff5}
-.action:nth-child(4) {--decor:#f7e1e5}
-.action-icon {
-  width:44px;height:44px;
-  display:grid;place-items:center;
-  border-radius:16px;
-  font-size:23px;
-  background:var(--decor);
-  margin-bottom:14px;
-  position:relative;
-  z-index:1;
-}
-.action strong {
-  display:block;
-  font:800 12px Manrope;
-  margin-bottom:6px;
-  position:relative;
-  z-index:1;
-}
-.action small {
-  display:block;
-  font-size:10px;
-  line-height:1.55;
-  color:var(--muted);
-  position:relative;
-  z-index:1;
-}
-.home-note {
-  margin-top:17px;
-  background:linear-gradient(120deg,#e5f0e4,#e9edf6);
-  border:1px solid #e0eadd;
-  border-radius:21px;
-  padding:15px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.home-note-icon {font-size:27px}
-.home-note p {
-  margin:0;
-  color:#718073;
-  font-size:10px;
-  line-height:1.7;
-}
-.home-note strong {color:#365c43}
-.footer {
-  text-align:center;
-  margin-top:24px;
-  color:#a2a69d;
-  font-size:10px;
-  line-height:1.8;
+.page.active {
+    display: block;
 }
 
-/* PAGES */
-.page {display:none;animation:appear .3s ease}
-.page.active {display:block}
 @keyframes appear {
-  from {opacity:0;transform:translateY(9px)}
-  to {opacity:1;transform:translateY(0)}
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-.back {
-  border:0;
-  background:#e8eee5;
-  color:#365b42;
-  padding:10px 14px;
-  border-radius:12px;
-  font-size:10px;
-  font-weight:800;
+
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: 26px 23px;
+    border-radius: 29px;
+    color: white;
+    background: linear-gradient(135deg,#8d7cf1 0%,#b18bea 52%,#f49bc1 100%);
+    box-shadow: 0 18px 35px rgba(143,120,220,.24);
 }
-.page-title {
-  font:800 29px Manrope;
-  letter-spacing:-1.2px;
-  margin:19px 0 8px;
+
+.hero::before {
+    content: "✦";
+    position: absolute;
+    right: 24px;
+    top: 15px;
+    font-size: 65px;
+    opacity: .2;
 }
-.page-description {
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.8;
-  margin:0 0 20px;
+
+.hero::after {
+    content: "♡";
+    position: absolute;
+    right: 65px;
+    bottom: -27px;
+    font-size: 110px;
+    opacity: .12;
 }
-.panel {
-  background:#ffffffed;
-  border:1px solid #eeeeea;
-  border-radius:23px;
-  padding:18px;
-  margin-bottom:13px;
-  box-shadow:0 7px 22px #344b3709;
+
+.hero-label {
+    display: inline-block;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 30px;
+    padding: 7px 11px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    margin-bottom: 15px;
 }
-.panel h3 {
-  font:800 13px Manrope;
-  margin:0 0 9px;
+
+.hero h1 {
+    position: relative;
+    z-index: 1;
+    font-size: 27px;
+    line-height: 1.22;
+    letter-spacing: -1px;
+    margin: 0 0 10px;
+    max-width: 340px;
 }
-.panel p {
-  color:#778176;
-  font-size:11px;
-  line-height:1.8;
-  margin:0;
+
+.hero p {
+    position: relative;
+    z-index: 1;
+    font-size: 12px;
+    line-height: 1.7;
+    opacity: .92;
+    max-width: 340px;
+    margin: 0;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 25px 2px 13px;
+}
+
+.section-heading h2 {
+    font-size: 16px;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -.4px;
+}
+
+.section-heading span {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.menu-card {
+    border: 1px solid var(--border);
+    border-radius: 23px;
+    padding: 17px 15px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    text-align: left;
+    min-height: 128px;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.menu-card:active {
+    transform: scale(.97);
+}
+
+.menu-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 15px;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.menu-card h3 {
+    margin: 0 0 4px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.menu-card p {
+    margin: 0;
+    font-size: 10px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.purple { background: #eeeaff; }
+.pink { background: #ffeaf1; }
+.green { background: #e5f8ef; }
+.yellow { background: #fff4dc; }
+.blue { background: #e7f1ff; }
+.peach { background: #fff0e7; }
+
+.quote-card {
+    margin-top: 17px;
+    padding: 18px;
+    border-radius: 22px;
+    background: linear-gradient(120deg,#fff1f6,#f2efff);
+    border: 1px solid rgba(255,255,255,.8);
+}
+
+.quote-card p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #625d7b;
+    font-weight: 600;
+}
+
+.quote-card span {
+    display: block;
+    margin-top: 9px;
+    color: #a18ed5;
+    font-size: 10px;
+    font-weight: 800;
 }
 
 /* CHAT */
-.chat-profile {
-  display:flex;
-  align-items:center;
-  gap:11px;
-  margin-top:18px;
-  margin-bottom:17px;
-}
-.chat-avatar {
-  width:46px;height:46px;
-  border-radius:17px;
-  background:linear-gradient(140deg,#e2f0df,#c9dfc8);
-  display:grid;
-  place-items:center;
-  font-size:24px;
-  box-shadow:0 5px 12px #456d4a15;
-}
-.chat-profile strong {
-  display:block;
-  font:800 13px Manrope;
-}
-.chat-profile small {
-  display:block;
-  margin-top:4px;
-  color:#8d978b;
-  font-size:10px;
-}
-.chat-box {
-  min-height:260px;
-  max-height:410px;
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  padding:5px 0 16px;
-  scroll-behavior:smooth;
-}
-.bubble {
-  max-width:88%;
-  border-radius:18px;
-  padding:12px 14px;
-  font-size:11px;
-  line-height:1.7;
-  overflow-wrap:anywhere;
-  white-space:pre-wrap;
-  box-shadow:0 3px 9px #344b3709;
-  animation:bubbleIn .25s ease;
-}
-@keyframes bubbleIn {
-  from {opacity:0;transform:translateY(7px)}
-  to {opacity:1;transform:translateY(0)}
-}
-.bubble.bot {
-  background:linear-gradient(135deg,#edf3e9,#e8efe7);
-  color:#344a38;
-  align-self:flex-start;
-  border-bottom-left-radius:5px;
-}
-.bubble.me {
-  background:linear-gradient(135deg,#527d5c,#315b43);
-  color:white;
-  align-self:flex-end;
-  border-bottom-right-radius:5px;
-}
-.chat-input {
-  display:flex;
-  gap:9px;
-  align-items:flex-end;
-}
-textarea {
-  resize:none;
-  width:100%;
-  border:1px solid #eaece5;
-  background:#fafaf7;
-  border-radius:16px;
-  padding:14px;
-  outline:none;
-  color:var(--text);
-  font-size:11px;
-  min-height:48px;
-}
-textarea:focus {
-  border-color:#9eb69a;
-  box-shadow:0 0 0 3px #9eb69a18;
-}
-.send {
-  background:linear-gradient(145deg,#65936b,#315b43);
-  border:0;
-  border-radius:15px;
-  width:49px;height:49px;
-  color:white;
-  flex-shrink:0;
-  font-size:19px;
-  box-shadow:0 6px 14px #315b4330;
-  transition:.2s;
-}
-.send:active {transform:scale(.94)}
-.send:disabled {opacity:.5}
-.chat-status {
-  font-size:10px;
-  color:var(--muted);
-  margin-top:11px;
-  line-height:1.6;
+
+.chat-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 17px;
 }
 
-/* REPLY NOTIFICATION */
+.back-button {
+    width: 39px;
+    height: 39px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255,255,255,.85);
+    color: var(--text);
+    font-size: 19px;
+}
+
+.chat-heading h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.chat-heading p {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.chat-card {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    background: rgba(255,255,255,.84);
+    box-shadow: var(--shadow);
+}
+
+.chat-top {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 15px;
+    display: grid;
+    place-items: center;
+    font-size: 21px;
+    background: linear-gradient(135deg,#ffe0eb,#e5dcff);
+}
+
+.chat-top strong {
+    display: block;
+    font-size: 12px;
+}
+
+.chat-top small {
+    display: block;
+    color: #61b18b;
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.chat-top .secure {
+    margin-left: auto;
+    font-size: 17px;
+}
+
 .reply-notice {
-  display:none;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  background:linear-gradient(120deg,#e4f1e3,#f1eafa);
-  border:1px solid #dce9dc;
-  border-radius:19px;
-  padding:14px;
-  margin-bottom:14px;
-  animation:appear .3s ease;
+    display: none;
+    margin: 12px 13px 0;
+    padding: 11px 13px;
+    border-radius: 14px;
+    color: #6d55b6;
+    background: #f0eaff;
+    font-size: 11px;
+    font-weight: 800;
+    animation: appear .25s ease;
 }
-.reply-notice.visible {display:flex}
-.reply-notice strong {
-  display:block;
-  font:800 12px Manrope;
-  color:#365b42;
-  margin-bottom:4px;
+
+.reply-notice.show {
+    display: block;
 }
-.reply-notice small {color:#7e8d7e;font-size:10px}
-.reply-notice button {
-  border:0;
-  background:#365b42;
-  color:white;
-  border-radius:12px;
-  padding:11px 13px;
-  font-size:10px;
-  font-weight:800;
-  white-space:nowrap;
+
+.chat-box {
+    height: min(52vh, 470px);
+    min-height: 300px;
+    overflow-y: auto;
+    padding: 16px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    scroll-behavior: smooth;
 }
-.chat-nav {position:relative}
+
+.day-label {
+    align-self: center;
+    color: #aaa6ba;
+    font-size: 9px;
+    background: #f4f2fa;
+    border-radius: 20px;
+    padding: 6px 11px;
+    margin: 3px 0 5px;
+}
+
+.message {
+    max-width: 85%;
+    padding: 11px 13px 9px;
+    border-radius: 17px;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    animation: appear .2s ease;
+}
+
+.message.user {
+    align-self: flex-end;
+    color: white;
+    background: linear-gradient(135deg,#8978ee,#a78ae9);
+    border-bottom-right-radius: 5px;
+}
+
+.message.admin {
+    align-self: flex-start;
+    color: #45415f;
+    background: #f0eef8;
+    border-bottom-left-radius: 5px;
+}
+
+.message-time {
+    display: block;
+    text-align: right;
+    opacity: .65;
+    font-size: 9px;
+    margin-top: 5px;
+}
+
+.chat-compose {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: rgba(255,255,255,.8);
+}
+
+.compose-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 9px;
+}
+
+.chat-compose textarea {
+    flex: 1;
+    resize: none;
+    min-height: 44px;
+    max-height: 110px;
+    border: 1px solid #e9e5f5;
+    border-radius: 15px;
+    padding: 12px;
+    outline: none;
+    color: var(--text);
+    background: #faf9ff;
+    font-size: 12px;
+}
+
+.chat-compose textarea:focus {
+    border-color: #aa9cf2;
+}
+
+.send-button {
+    width: 45px;
+    height: 45px;
+    border: 0;
+    border-radius: 15px;
+    color: white;
+    font-size: 19px;
+    background: linear-gradient(135deg,#8c7af0,#bd8be9);
+    box-shadow: 0 6px 15px rgba(143,120,220,.25);
+}
+
+.send-button:disabled {
+    opacity: .55;
+}
+
+.chat-status {
+    min-height: 15px;
+    padding: 7px 3px 0;
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.chat-footnote {
+    padding: 10px 14px 13px;
+    color: #9995aa;
+    font-size: 9px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* OTHER PAGES */
+
+.content-card {
+    padding: 21px;
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    margin-bottom: 13px;
+}
+
+.content-card h2 {
+    margin: 0 0 9px;
+    font-size: 18px;
+}
+
+.content-card h3 {
+    font-size: 13px;
+    margin: 17px 0 7px;
+}
+
+.content-card p {
+    color: #77748d;
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 8px 0;
+}
+
+.big-emoji {
+    font-size: 42px;
+    margin-bottom: 12px;
+}
+
+.primary-button {
+    width: 100%;
+    border: 0;
+    padding: 14px;
+    border-radius: 16px;
+    color: white;
+    font-weight: 800;
+    font-size: 12px;
+    background: linear-gradient(135deg,#8978ef,#bd8be9);
+    box-shadow: 0 8px 18px rgba(143,120,220,.2);
+    margin-top: 12px;
+}
+
+.mood-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 9px;
+    margin-top: 16px;
+}
+
+.mood-option {
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    padding: 13px 5px;
+    background: #fff;
+    text-align: center;
+    color: var(--text);
+}
+
+.mood-option.selected {
+    border: 2px solid #a494f2;
+    background: #f1edff;
+}
+
+.mood-option span {
+    display: block;
+    font-size: 25px;
+    margin-bottom: 5px;
+}
+
+.mood-option small {
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.bottom-nav {
+    position: fixed;
+    z-index: 10;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(calc(100% - 26px), 505px);
+    padding: 9px 7px;
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 3px;
+    border: 1px solid rgba(255,255,255,.85);
+    border-radius: 22px;
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 10px 35px rgba(65,55,110,.15);
+}
+
+.nav-item {
+    border: 0;
+    border-radius: 15px;
+    background: transparent;
+    color: #9692a9;
+    padding: 7px 3px 5px;
+    position: relative;
+}
+
+.nav-item.active {
+    color: #806fe5;
+    background: #f0edff;
+}
+
+.nav-item .nav-icon {
+    display: block;
+    font-size: 19px;
+    line-height: 1.3;
+}
+
+.nav-item small {
+    display: block;
+    font-size: 9px;
+    font-weight: 800;
+    margin-top: 3px;
+}
+
 .nav-badge {
-  display:none;
-  position:absolute;
-  top:0;right:2px;
-  min-width:16px;height:16px;
-  padding:0 4px;
-  border-radius:20px;
-  background:#e16d69;
-  color:white;
-  font-size:9px;
-  font-weight:800;
-  align-items:center;
-  justify-content:center;
-}
-.nav-badge.visible {display:flex}
-
-/* MOOD */
-.mood-intro {
-  display:flex;
-  align-items:center;
-  gap:13px;
-  padding:17px;
-  border-radius:21px;
-  margin-bottom:14px;
-  background:linear-gradient(120deg,#f8e9df,#f4e9f4);
-  border:1px solid #f0e5e9;
-}
-.mood-intro span {font-size:33px}
-.mood-intro p {
-  margin:0;
-  color:#8b7776;
-  font-size:11px;
-  line-height:1.7;
-}
-.moods {
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:7px;
-}
-.mood {
-  background:#f8f8f4;
-  border:1px solid transparent;
-  border-radius:15px;
-  padding:12px 2px;
-  text-align:center;
-  transition:.2s;
-}
-.mood span {display:block;font-size:23px}
-.mood small {
-  display:block;
-  font-size:9px;
-  margin-top:7px;
-  color:var(--muted);
-}
-.mood.selected {
-  background:#e5f0e2;
-  border-color:#a7c1a4;
-  transform:translateY(-3px);
-  box-shadow:0 5px 12px #5c80551a;
-}
-textarea.note {min-height:100px;margin-top:13px}
-.save {
-  width:100%;
-  border:0;
-  background:linear-gradient(135deg,#63936a,#315b43);
-  color:white;
-  border-radius:15px;
-  padding:15px;
-  font-weight:800;
-  margin-top:15px;
-  font-size:11px;
-  box-shadow:0 6px 15px #315b4320;
+    display: none;
+    position: absolute;
+    top: 1px;
+    right: 19%;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: 20px;
+    background: #ff78a6;
+    color: white;
+    font-size: 9px;
+    line-height: 15px;
 }
 
-/* INFORMATION CARDS */
-.info-card {
-  border-radius:22px;
-  padding:18px;
-  margin-bottom:12px;
-  border:1px solid transparent;
-}
-.info-card .emoji {
-  font-size:26px;
-  margin-bottom:10px;
-}
-.info-card h3 {
-  font:800 13px Manrope;
-  margin:0 0 7px;
-}
-.info-card p {
-  font-size:11px;
-  line-height:1.8;
-  margin:0;
-  color:#737e75;
-}
-.info-green {background:linear-gradient(130deg,#e6f1e4,#edf4e9);border-color:#dce9d8}
-.info-pink {background:linear-gradient(130deg,#f7e8e8,#f8eeee);border-color:#f0dddd}
-.info-yellow {background:linear-gradient(130deg,#f8f0df,#f8f3e9);border-color:#eee4cc}
-.info-purple {background:linear-gradient(130deg,#eee8f6,#f2edf7);border-color:#e5dcef}
-.info-blue {background:linear-gradient(130deg,#e7eef6,#eef2f7);border-color:#dce5ed}
-
-/* NAVIGATION */
-.nav {
-  position:fixed;
-  bottom:0;left:0;right:0;
-  background:#ffffffed;
-  backdrop-filter:blur(22px);
-  border-top:1px solid #e9e9e2;
-  display:flex;
-  justify-content:center;
-  z-index:10;
-  padding:9px 6px calc(9px + env(safe-area-inset-bottom));
-}
-.nav-inner {
-  width:100%;
-  max-width:570px;
-  display:flex;
-  justify-content:space-around;
-}
-.nav button {
-  border:0;
-  background:transparent;
-  color:#969d92;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:5px;
-  font-size:9px;
-  padding:5px 8px;
-  position:relative;
-}
-.nav button span {
-  font-size:20px;
-  transition:transform .2s;
-}
-.nav button.active {
-  color:#315b43;
-  font-weight:800;
-}
-.nav button.active span {transform:translateY(-3px)}
-
-/* TOAST */
 .toast {
-  position:fixed;
-  bottom:105px;
-  left:50%;
-  transform:translate(-50%,15px);
-  background:#2d4937;
-  color:white;
-  border-radius:16px;
-  padding:13px 18px;
-  font-size:11px;
-  opacity:0;
-  pointer-events:none;
-  transition:.25s;
-  z-index:30;
-  width:max-content;
-  max-width:90%;
-  box-shadow:0 8px 24px #203a2b35;
-}
-.toast.show {
-  opacity:1;
-  transform:translate(-50%,0);
+    position: fixed;
+    z-index: 30;
+    left: 50%;
+    bottom: 93px;
+    transform: translate(-50%, 15px);
+    opacity: 0;
+    pointer-events: none;
+    width: max-content;
+    max-width: calc(100% - 35px);
+    padding: 12px 17px;
+    border-radius: 16px;
+    color: white;
+    background: #38334f;
+    box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    font-size: 11px;
+    font-weight: 700;
+    transition: .25s;
+    text-align: center;
 }
 
-@media(max-width:360px) {
-  .app {padding-left:14px;padding-right:14px}
-  .nav button {padding-left:5px;padding-right:5px}
-  .hero {padding:23px 19px}
-  .moods {gap:4px}
-  .mood small {font-size:8px}
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.loading-line {
+    text-align: center;
+    color: #aaa5ba;
+    font-size: 11px;
+    padding: 25px 10px;
+}
+
+@media (max-width: 360px) {
+    .app { padding-left: 12px; padding-right: 12px; }
+    .hero h1 { font-size: 24px; }
+    .menu-card { padding: 14px 12px; }
 }
 </style>
 </head>
 
 <body>
+
 <div class="app">
 
-<header class="top">
-  <div class="brand">
-    <div class="logo">♡</div>
-    <div>
-      <div class="brand-title">Егор, помоги мне!</div>
-      <div class="brand-sub">Пространство поддержки ✨</div>
-    </div>
-  </div>
-  <div class="online"><i class="dot"></i> Рядом</div>
-</header>
+    <header class="topbar">
+        <div class="brand">
+            <div class="logo">💗</div>
+            <div>
+                <div class="brand-title">Егор, помоги мне!</div>
+                <div class="brand-subtitle">Место, где тебя услышат</div>
+            </div>
+        </div>
 
-<main>
+        <div class="online">
+            <span class="online-dot"></span>
+            На связи
+        </div>
+    </header>
 
-<!-- ГЛАВНАЯ -->
-<section class="page active" id="home">
 
-  <div class="hero">
-    <div class="hero-top">
-      <div class="hero-tag">🌿 ТВОЁ МЕСТО СПОКОЙСТВИЯ</div>
-      <div class="hero-star">✦</div>
-    </div>
+    <!-- HOME -->
 
-    <h1>Тебе не обязательно справляться одному.</h1>
+    <section class="page active" id="page-home">
 
-    <p>Здесь можно выдохнуть, рассказать о переживаниях и просто быть собой. Без осуждения и лишних вопросов. ❤️</p>
+        <div class="hero">
+            <div class="hero-label">ТЫ НЕ ОДИН ❤️</div>
+            <h1>Иногда важно просто быть услышанным.</h1>
+            <p>
+                Здесь можно выговориться, поделиться переживаниями
+                или просто поговорить. Без осуждения и лишнего давления.
+            </p>
+        </div>
 
-    <button class="hero-button" onclick="showPage('chat')">
-      💌 Начать разговор ↗
-    </button>
+        <div class="section-heading">
+            <h2>Чем займёмся?</h2>
+            <span>Выбирай, что ближе</span>
+        </div>
 
-    <div class="hero-decoration">✿</div>
-  </div>
+        <div class="menu-grid">
 
-  <div class="welcome">
-    <span class="welcome-icon">✨</span>
-    <span>Привет! <strong>Ты в правильном месте.</strong></span>
-  </div>
+            <button class="menu-card" onclick="showPage('chat')">
+                <div class="menu-icon purple">💬</div>
+                <h3>Поговорить</h3>
+                <p>Напиши Егору и расскажи, что случилось</p>
+            </button>
 
-  <div class="quote">
-    <div class="quote-mark">“</div>
-    <p>Иногда самый важный шаг — просто позволить себе сказать, что тебе тяжело.</p>
-    <small>🌷 Небольшое напоминание для тебя</small>
-  </div>
+            <button class="menu-card" onclick="showPage('mood')">
+                <div class="menu-icon pink">🌈</div>
+                <h3>Моё настроение</h3>
+                <p>Разберись, что чувствуешь сегодня</p>
+            </button>
 
-  <div class="section-head">
-    <h2>Чем я могу помочь? 💚</h2>
-    <span>Выбери своё</span>
-  </div>
+            <button class="menu-card" onclick="showPage('anonymous')">
+                <div class="menu-icon green">🕊️</div>
+                <h3>О приватности</h3>
+                <p>Узнай, кто увидит твоё обращение</p>
+            </button>
 
-  <div class="actions">
+            <button class="menu-card" onclick="showPage('help')">
+                <div class="menu-icon yellow">🫶</div>
+                <h3>Мне нужна помощь</h3>
+                <p>Что делать, если сейчас особенно тяжело</p>
+            </button>
 
-    <button class="action" onclick="showPage('chat')">
-      <div class="action-icon">💌</div>
-      <strong>Поговорить</strong>
-      <small>Расскажи, что у тебя на душе</small>
-    </button>
+        </div>
 
-    <button class="action" onclick="showPage('mood')">
-      <div class="action-icon">🌤️</div>
-      <strong>Моё настроение</strong>
-      <small>Прислушайся к своим чувствам</small>
-    </button>
+        <div class="quote-card">
+            <p>«Тебе не обязательно справляться со всем самостоятельно. Иногда первый шаг — просто рассказать кому-то о том, что внутри».</p>
+            <span>НЕБОЛЬШОЕ НАПОМИНАНИЕ ✨</span>
+        </div>
 
-    <button class="action" onclick="showPage('anonymous')">
-      <div class="action-icon">🕊️</div>
-      <strong>Анонимное обращение</strong>
-      <small>Узнай, как написать без имени</small>
-    </button>
+    </section>
 
-    <button class="action" onclick="showPage('help')">
-      <div class="action-icon">🫶</div>
-      <strong>Мне нужна помощь</strong>
-      <small>Полезная информация и поддержка</small>
-    </button>
 
-  </div>
+    <!-- CHAT -->
 
-  <div class="home-note">
-    <div class="home-note-icon">💚</div>
-    <p><strong>Ты важен.</strong> Твои чувства имеют значение. Не забывай заботиться о себе, хорошо?</p>
-  </div>
+    <section class="page" id="page-chat">
 
-  <div class="footer">
-    Сделано с теплом и желанием поддержать ❤️
-  </div>
-</section>
+        <div class="chat-heading">
+            <button class="back-button" onclick="showPage('home')">‹</button>
+            <div>
+                <h2>Твой диалог</h2>
+                <p>Здесь можно говорить обо всём ❤️</p>
+            </div>
+        </div>
 
-<!-- ЧАТ -->
-<section class="page" id="chat">
+        <div class="chat-card">
 
-  <button class="back" onclick="showPage('home')">← На главную</button>
+            <div class="chat-top">
+                <div class="avatar">🧸</div>
+                <div>
+                    <strong>Егор</strong>
+                    <small>Готов прочитать твоё сообщение</small>
+                </div>
+                <div class="secure">💗</div>
+            </div>
 
-  <div class="chat-profile">
-    <div class="chat-avatar">💬</div>
-    <div>
-      <strong>Твой разговор с Егором</strong>
-      <small>Можешь говорить обо всём ❤️</small>
-    </div>
-  </div>
+            <div class="reply-notice" id="replyNotice">
+                💌 Егор ответил тебе! Посмотри новое сообщение.
+            </div>
 
-  <h1 class="page-title">Давай поговорим.</h1>
-  <p class="page-description">Можешь написать всё, что хочется. Не нужно подбирать идеальные слова. Я постараюсь тебя услышать. 🌿</p>
+            <div class="chat-box" id="chatBox">
+                <div class="loading-line" id="historyLoading">
+                    Загружаем вашу переписку... 💗
+                </div>
+            </div>
 
-  <div class="reply-notice" id="replyNotice">
-    <div>
-      <strong>💌 Егор ответил тебе!</strong>
-      <small>У тебя новое сообщение ❤️</small>
-    </div>
-    <button onclick="openLatestReply()">Посмотреть ↗</button>
-  </div>
+            <div class="chat-compose">
+                <div class="compose-row">
+                    <textarea
+                        id="chatMessage"
+                        rows="1"
+                        maxlength="4000"
+                        placeholder="Напиши, что у тебя на душе..."
+                    ></textarea>
 
-  <div class="panel">
-    <div class="chat-box" id="chatBox">
-      <div class="bubble bot">Привет! ❤️ Я рад, что ты здесь. Можешь не торопиться. Расскажи, что сейчас у тебя на душе? 🌷</div>
-    </div>
+                    <button
+                        class="send-button"
+                        id="sendButton"
+                        onclick="sendMessage()"
+                        aria-label="Отправить"
+                    >➤</button>
+                </div>
 
-    <div class="chat-input">
-      <textarea id="chatMessage" rows="1" maxlength="4000" placeholder="Напиши своё сообщение... 💭"></textarea>
-      <button class="send" id="sendButton" onclick="sendMessage()">➤</button>
-    </div>
+                <div class="chat-status" id="chatStatus">
+                    Сообщения сохраняются в истории диалога.
+                </div>
+            </div>
 
-    <div class="chat-status" id="chatStatus">
-      🔒 Твои сообщения будут доставлены Егору ❤️
-    </div>
-  </div>
-</section>
+            <div class="chat-footnote">
+                Твои сообщения увидит Егор. Отвечать он сможет, когда будет свободен.
+            </div>
 
-<!-- НАСТРОЕНИЕ -->
-<section class="page" id="mood">
+        </div>
 
-  <button class="back" onclick="showPage('home')">← На главную</button>
+    </section>
 
-  <h1 class="page-title">Как ты сегодня? ☁️</h1>
-  <p class="page-description">Не нужно притворяться, что всё хорошо. Здесь можно честно признаться себе в своих чувствах.</p>
 
-  <div class="mood-intro">
-    <span>🌈</span>
-    <p>Любое твоё настроение нормально. Не ругай себя за то, что чувствуешь.</p>
-  </div>
+    <!-- MOOD -->
 
-  <div class="panel">
-    <h3>Выбери своё состояние 💭</h3>
+    <section class="page" id="page-mood">
 
-    <div class="moods">
-      <button class="mood" onclick="selectMood(this,'Радостно')"><span>😊</span><small>Радостно</small></button>
-      <button class="mood" onclick="selectMood(this,'Спокойно')"><span>😌</span><small>Спокойно</small></button>
-      <button class="mood" onclick="selectMood(this,'Грустно')"><span>😔</span><small>Грустно</small></button>
-      <button class="mood" onclick="selectMood(this,'Тревожно')"><span>😟</span><small>Тревожно</small></button>
-      <button class="mood" onclick="selectMood(this,'Тяжело')"><span>🥺</span><small>Тяжело</small></button>
-    </div>
+        <div class="chat-heading">
+            <button class="back-button" onclick="showPage('home')">‹</button>
+            <div>
+                <h2>Как ты сегодня?</h2>
+                <p>Любое чувство имеет право быть</p>
+            </div>
+        </div>
 
-    <textarea class="note" id="moodNote" placeholder="Хочешь рассказать немного подробнее? 💬"></textarea>
+        <div class="content-card">
+            <div class="big-emoji">🌤️</div>
+            <h2>Что сейчас у тебя внутри?</h2>
+            <p>Не нужно выбирать «правильное» настроение. Просто отметь то, что ближе всего.</p>
 
-    <button class="save" onclick="saveMood()">💚 Сохранить состояние</button>
-  </div>
+            <div class="mood-grid">
+                <button class="mood-option" onclick="selectMood(this,'Радостно')">
+                    <span>😄</span><small>Радостно</small>
+                </button>
+                <button class="mood-option" onclick="selectMood(this,'Спокойно')">
+                    <span>😌</span><small>Спокойно</small>
+                </button>
+                <button class="mood-option" onclick="selectMood(this,'Грустно')">
+                    <span>😔</span><small>Грустно</small>
+                </button>
+                <button class="mood-option" onclick="selectMood(this,'Тревожно')">
+                    <span>😟</span><small>Тревожно</small>
+                </button>
+                <button class="mood-option" onclick="selectMood(this,'Злюсь')">
+                    <span>😤</span><small>Злюсь</small>
+                </button>
+                <button class="mood-option" onclick="selectMood(this,'Не понимаю')">
+                    <span>🥺</span><small>Не понимаю</small>
+                </button>
+            </div>
 
-  <div class="info-card info-purple">
-    <div class="emoji">🫂</div>
-    <h3>Будь к себе добрее</h3>
-    <p>Ты не обязан быть продуктивным, весёлым и сильным каждую минуту. Иногда просто прожить день — уже достаточно.</p>
-  </div>
+            <button class="primary-button" onclick="saveMood()">
+                Сохранить настроение 💗
+            </button>
+        </div>
 
-  <p class="page-description">Историю настроения подключим следующим этапом.</p>
-</section>
+        <div class="content-card">
+            <h3>Маленькое напоминание</h3>
+            <p>Твоё настроение не определяет твою ценность. Даже если сегодня тяжёлый день, ты всё равно заслуживаешь заботы и поддержки.</p>
+        </div>
 
-<!-- АНОНИМНОСТЬ -->
-<section class="page" id="anonymous">
+    </section>
 
-  <button class="back" onclick="showPage('home')">← На главную</button>
 
-  <h1 class="page-title">Можно без имени. 🕊️</h1>
-  <p class="page-description">Иногда проще рассказать о важном, когда не нужно представляться.</p>
+    <!-- PRIVACY -->
 
-  <div class="info-card info-purple">
-    <div class="emoji">🌸</div>
-    <h3>Твоё пространство для откровенности</h3>
-    <p>Мы предусмотрим отдельный способ отправки обращений без отображения имени и username в сообщении Егору.</p>
-  </div>
+    <section class="page" id="page-anonymous">
 
-  <div class="info-card info-yellow">
-    <div class="emoji">🔐</div>
-    <h3>Важное уточнение</h3>
-    <p>Telegram передаёт приложению технические данные аккаунта. Мы не обещаем абсолютную анонимность.</p>
-  </div>
+        <div class="chat-heading">
+            <button class="back-button" onclick="showPage('home')">‹</button>
+            <div>
+                <h2>О приватности</h2>
+                <p>Твои границы важны</p>
+            </div>
+        </div>
 
-  <button class="save" onclick="showPage('chat')">💌 Перейти к разговору</button>
-</section>
+        <div class="content-card">
+            <div class="big-emoji">🕊️</div>
+            <h2>Можно ли написать анонимно?</h2>
+            <p>
+                Мы хотим, чтобы здесь было безопасно и спокойно.
+                Но важно честно объяснить, как работает приложение.
+            </p>
 
-<!-- ПОМОЩЬ -->
-<section class="page" id="help">
+            <h3>🔐 Что нужно знать</h3>
+            <p>
+                При использовании Telegram Mini App приложение получает
+                технические данные Telegram, включая идентификатор аккаунта.
+                Он используется, чтобы связать твою переписку с тобой.
+            </p>
 
-  <button class="back" onclick="showPage('home')">← На главную</button>
+            <h3>👀 Кто увидит сообщения?</h3>
+            <p>
+                Сообщения, отправленные через этот проект, получает Егор.
+                Не отправляй сюда пароли, банковские данные или другую
+                информацию, которую не хочешь раскрывать.
+            </p>
 
-  <h1 class="page-title">Ты не один. 🫶</h1>
-  <p class="page-description">Несколько важных напоминаний для трудного момента.</p>
+            <h3>💗 Важное уточнение</h3>
+            <p>
+                Мы не обещаем абсолютную анонимность. Если тебе важно
+                не раскрывать личность, не указывай в сообщениях
+                своё имя, адрес и другие идентифицирующие подробности.
+            </p>
 
-  <div class="info-card info-green">
-    <div class="emoji">💚</div>
-    <h3>Твои чувства имеют значение</h3>
-    <p>Не нужно обесценивать своё состояние. Твои переживания заслуживают внимания. Ты заслуживаешь заботы.</p>
-  </div>
+            <button class="primary-button" onclick="showPage('chat')">
+                Перейти к диалогу
+            </button>
+        </div>
 
-  <div class="info-card info-yellow">
-    <div class="emoji">☁️</div>
-    <h3>Можно сделать паузу</h3>
-    <p>Попробуй немного замедлиться, спокойно подышать, выпить воды или обратиться к человеку, которому доверяешь.</p>
-  </div>
+    </section>
 
-  <div class="info-card info-pink">
-    <div class="emoji">🫂</div>
-    <h3>Не обязательно быть сильным всегда</h3>
-    <p>Просить о помощи — не слабость. Иногда это самое смелое, что можно сделать.</p>
-  </div>
 
-  <div class="info-card info-blue">
-    <div class="emoji">🆘</div>
-    <h3>Когда нужна срочная помощь</h3>
-    <p>Если ты в опасности, не оставайся один. Обратись к близкому человеку и в местную экстренную службу.</p>
-  </div>
-</section>
+    <!-- HELP -->
 
-<!-- О ПРОЕКТЕ -->
-<section class="page" id="about">
+    <section class="page" id="page-help">
 
-  <button class="back" onclick="showPage('home')">← На главную</button>
+        <div class="chat-heading">
+            <button class="back-button" onclick="showPage('home')">‹</button>
+            <div>
+                <h2>Если тебе тяжело</h2>
+                <p>Не обязательно проходить через это одному</p>
+            </div>
+        </div>
 
-  <h1 class="page-title">Зачем этот проект? 🌿</h1>
-  <p class="page-description">«Егор, помоги мне!» — пространство, созданное с желанием выслушивать и поддерживать людей.</p>
+        <div class="content-card">
+            <div class="big-emoji">🫶</div>
+            <h2>С чего можно начать?</h2>
+            <p>Иногда сложно даже подобрать слова. Попробуй начать с чего-то простого:</p>
 
-  <div class="info-card info-green">
-    <div class="emoji">🤍</div>
-    <h3>Немного человечности</h3>
-    <p>Иногда человеку не нужен готовый ответ. Ему важно, чтобы его услышали и не осудили.</p>
-  </div>
+            <h3>1. Сделай небольшую паузу</h3>
+            <p>Найди спокойное место, сядь поудобнее и попробуй немного замедлиться.</p>
 
-  <div class="info-card info-yellow">
-    <div class="emoji">✨</div>
-    <h3>Наша идея</h3>
-    <p>Создать место, в котором можно поделиться переживаниями и почувствовать, что тебя услышали.</p>
-  </div>
+            <h3>2. Не держи всё в себе</h3>
+            <p>Напиши человеку, которому доверяешь. Можно рассказать Егору о том, что происходит.</p>
 
-  <div class="info-card info-pink">
-    <div class="emoji">💌</div>
-    <h3>Кто отвечает?</h3>
-    <p>На обращения отвечает Егор. Проект не заменяет профессиональную психологическую помощь.</p>
-  </div>
+            <h3>3. Не требуй от себя невозможного</h3>
+            <p>Необязательно решить все проблемы прямо сейчас. Иногда достаточно сделать один небольшой шаг.</p>
 
-  <div class="footer">Спасибо, что заглянул сюда. ❤️</div>
-</section>
+            <h3>⚠️ Если есть непосредственная опасность</h3>
+            <p>Если ты можешь причинить вред себе или кому-то ещё либо находишься в опасности, не жди ответа в приложении. Обратись в местную экстренную службу или к человеку, который может прямо сейчас быть рядом.</p>
 
-</main>
+            <button class="primary-button" onclick="showPage('chat')">
+                Написать Егору ❤️
+            </button>
+        </div>
+
+    </section>
+
+
+    <!-- ABOUT -->
+
+    <section class="page" id="page-about">
+
+        <div class="chat-heading">
+            <button class="back-button" onclick="showPage('home')">‹</button>
+            <div>
+                <h2>О проекте</h2>
+                <p>Немного о том, зачем мы здесь</p>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="big-emoji">💗</div>
+            <h2>Егор, помоги мне!</h2>
+            <p>
+                Это небольшой проект, созданный для тех, кому хочется
+                выговориться, поделиться переживаниями или просто
+                почувствовать, что их кто-то слышит.
+            </p>
+            <p>
+                Здесь можно написать о сложностях, задать вопрос
+                или рассказать о том, что давно не получается
+                держать в себе.
+            </p>
+            <p>
+                Егор постарается прочитать каждое обращение
+                и ответить с пониманием и уважением.
+            </p>
+            <p>
+                Проект не заменяет профессиональную психологическую
+                помощь, медицинскую помощь или экстренные службы.
+            </p>
+
+            <button class="primary-button" onclick="showPage('chat')">
+                Начать разговор 💬
+            </button>
+        </div>
+
+    </section>
+
 </div>
 
-<!-- NAVIGATION -->
-<nav class="nav">
-  <div class="nav-inner">
 
-    <button class="active" data-page="home" onclick="showPage('home')">
-      <span>🏡</span>Главная
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav">
+
+    <button class="nav-item active" id="nav-home" onclick="showPage('home')">
+        <span class="nav-icon">🏠</span>
+        <small>Главная</small>
     </button>
 
-    <button class="chat-nav" data-page="chat" onclick="showPage('chat')">
-      <span>💬</span>Чат
-      <i class="nav-badge" id="chatBadge">0</i>
+    <button class="nav-item" id="nav-chat" onclick="showPage('chat')">
+        <span class="nav-icon">💬</span>
+        <small>Диалог</small>
+        <span class="nav-badge" id="chatBadge">0</span>
     </button>
 
-    <button data-page="mood" onclick="showPage('mood')">
-      <span>🌤️</span>Настроение
+    <button class="nav-item" id="nav-mood" onclick="showPage('mood')">
+        <span class="nav-icon">🌈</span>
+        <small>Настроение</small>
     </button>
 
-    <button data-page="help" onclick="showPage('help')">
-      <span>🫶</span>Помощь
+    <button class="nav-item" id="nav-about" onclick="showPage('about')">
+        <span class="nav-icon">💗</span>
+        <small>О проекте</small>
     </button>
 
-    <button data-page="about" onclick="showPage('about')">
-      <span>✨</span>О проекте
-    </button>
-
-  </div>
 </nav>
 
+
 <div class="toast" id="toast"></div>
+
 
 <script>
 const tg = window.Telegram?.WebApp;
 const initData = tg?.initData || "";
 
 if (tg) {
-  tg.ready();
-  tg.expand();
-  tg.setHeaderColor('#f8f7f4');
-  tg.setBackgroundColor('#f8f7f4');
+    tg.ready();
+    tg.expand();
+
+    try {
+        tg.setHeaderColor("#f7f5ff");
+        tg.setBackgroundColor("#f7f5ff");
+    } catch (e) {}
 }
 
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(page => {
-    page.classList.toggle('active', page.id === id);
-  });
 
-  document.querySelectorAll('.nav button').forEach(button => {
-    button.classList.toggle('active', button.dataset.page === id);
-  });
+// =====================================================
+// STATE
+// =====================================================
 
-  window.scrollTo({top:0,behavior:'smooth'});
+let currentPage = "home";
+let selectedMood = "";
+let latestMessageId = 0;
+let lastSeenReplyId = 0;
+let isSending = false;
+let historyLoaded = false;
+let pollingBusy = false;
+let unreadCount = 0;
 
-  if (id === 'chat') {
-    markRepliesAsRead();
-    loadReplies(false);
-  }
+let userStorageKey = "support_last_seen";
+
+try {
+    if (tg?.initDataUnsafe?.user?.id) {
+        userStorageKey += "_" + tg.initDataUnsafe.user.id;
+    }
+} catch (e) {}
+
+try {
+    lastSeenReplyId = Number(localStorage.getItem(userStorageKey) || 0);
+} catch (e) {}
+
+
+// =====================================================
+// HELPERS
+// =====================================================
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[char]);
 }
 
-function toast(message) {
-  const element = document.getElementById('toast');
-  element.textContent = message;
-  element.classList.add('show');
+function showToast(message) {
+    const toast = document.getElementById("toast");
 
-  clearTimeout(window.toastTimer);
+    toast.textContent = message;
+    toast.classList.add("show");
 
-  window.toastTimer = setTimeout(() => {
-    element.classList.remove('show');
-  },3500);
+    clearTimeout(showToast.timer);
+
+    showToast.timer = setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2800);
 }
 
-function addBubble(text,role,id) {
-  if (id && document.querySelector('[data-message-id="' + id + '"]')) {
-    return;
-  }
+function formatTime(timestamp) {
+    if (!timestamp) return "";
 
-  const box = document.getElementById('chatBox');
-  const bubble = document.createElement('div');
+    const date = new Date(timestamp * 1000);
 
-  bubble.className = 'bubble ' + (role === 'admin' ? 'bot' : 'me');
-
-  if (id) {
-    bubble.dataset.messageId = id;
-  }
-
-  bubble.appendChild(document.createTextNode(text));
-  box.appendChild(bubble);
-
-  box.scrollTop = box.scrollHeight;
+    return date.toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
 }
 
-let lastReplyId = 0;
-let sending = false;
-let unreadReplies = 0;
-let firstReplyCheck = true;
-let checkingReplies = false;
+function vibrate(type = "success") {
+    try {
+        tg?.HapticFeedback?.notificationOccurred(type);
+    } catch (e) {}
+}
 
-function updateReplyBadge() {
-  const badge = document.getElementById('chatBadge');
-  const notice = document.getElementById('replyNotice');
 
-  if (unreadReplies > 0) {
-    badge.textContent = unreadReplies > 9 ? '9+' : unreadReplies;
-    badge.classList.add('visible');
-    notice.classList.add('visible');
-  } else {
-    badge.classList.remove('visible');
-    notice.classList.remove('visible');
-  }
+// =====================================================
+// NAVIGATION
+// =====================================================
+
+function showPage(page) {
+    currentPage = page;
+
+    document.querySelectorAll(".page").forEach(element => {
+        element.classList.remove("active");
+    });
+
+    const target = document.getElementById("page-" + page);
+
+    if (target) {
+        target.classList.add("active");
+    }
+
+    document.querySelectorAll(".nav-item").forEach(element => {
+        element.classList.remove("active");
+    });
+
+    const nav = document.getElementById("nav-" + page);
+
+    if (nav) {
+        nav.classList.add("active");
+    }
+
+    if (page === "chat") {
+        markRepliesAsRead();
+        loadHistory();
+    }
+}
+
+
+// =====================================================
+// CHAT RENDERING
+// =====================================================
+
+function addBubble(message, role, timestamp, id) {
+    const box = document.getElementById("chatBox");
+
+    const loading = document.getElementById("historyLoading");
+
+    if (loading) {
+        loading.remove();
+    }
+
+    const bubble = document.createElement("div");
+
+    bubble.className = "message " + (role === "admin" ? "admin" : "user");
+
+    if (id) {
+        bubble.dataset.messageId = String(id);
+    }
+
+    const text = document.createElement("div");
+    text.textContent = message;
+
+    const time = document.createElement("span");
+    time.className = "message-time";
+    time.textContent = formatTime(timestamp || Math.floor(Date.now() / 1000));
+
+    bubble.appendChild(text);
+    bubble.appendChild(time);
+
+    box.appendChild(bubble);
+
+    box.scrollTop = box.scrollHeight;
+
+    return bubble;
+}
+
+function renderHistory(messages) {
+    const box = document.getElementById("chatBox");
+
+    box.innerHTML = "";
+
+    if (!messages || messages.length === 0) {
+        const welcome = document.createElement("div");
+        welcome.className = "message admin";
+
+        const text = document.createElement("div");
+        text.textContent = "Привет! ❤️\n\nЭто твой личный диалог с Егором. Здесь можно спокойно рассказать о том, что тебя беспокоит. Я прочитаю твоё сообщение и постараюсь ответить.";
+
+        const time = document.createElement("span");
+        time.className = "message-time";
+        time.textContent = "Сейчас";
+
+        welcome.appendChild(text);
+        welcome.appendChild(time);
+        box.appendChild(welcome);
+
+        return;
+    }
+
+    messages.forEach(message => {
+        addBubble(
+            message.text,
+            message.role,
+            message.created_at,
+            message.id
+        );
+    });
+
+    box.scrollTop = box.scrollHeight;
+}
+
+
+// =====================================================
+// LOAD COMPLETE HISTORY
+// =====================================================
+
+async function loadHistory() {
+    if (!initData) {
+        document.getElementById("chatBox").innerHTML =
+            '<div class="loading-line">Открой приложение через Telegram-бота, чтобы пользоваться перепиской ❤️</div>';
+
+        return;
+    }
+
+    if (historyLoaded) return;
+
+    const status = document.getElementById("chatStatus");
+    status.textContent = "Загружаем историю...";
+
+    try {
+        const response = await fetch("/api/history", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                initData: initData
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+            throw new Error(data.error || "Не удалось загрузить историю");
+        }
+
+        renderHistory(data.messages || []);
+
+        latestMessageId = Number(data.latest_id || 0);
+
+        historyLoaded = true;
+
+        const adminMessages = (data.messages || []).filter(
+            message => message.role === "admin"
+        );
+
+        const newestReply = adminMessages.length
+            ? Math.max(...adminMessages.map(message => Number(message.id)))
+            : 0;
+
+        if (newestReply > lastSeenReplyId && currentPage !== "chat") {
+            unreadCount = adminMessages.filter(
+                message => Number(message.id) > lastSeenReplyId
+            ).length;
+
+            updateUnreadBadge();
+            document.getElementById("replyNotice").classList.add("show");
+        }
+
+        if (currentPage === "chat") {
+            markRepliesAsRead();
+        }
+
+        status.textContent = "История переписки загружена ❤️";
+
+    } catch (error) {
+        status.textContent = error.message;
+
+        document.getElementById("chatBox").innerHTML =
+            '<div class="loading-line">Не удалось загрузить переписку. Попробуй ещё раз.</div>';
+
+        showToast("Не удалось загрузить историю 😔");
+    }
+}
+
+
+// =====================================================
+// POLL NEW REPLIES
+// =====================================================
+
+async function loadReplies() {
+    if (!initData || !historyLoaded || pollingBusy) return;
+
+    pollingBusy = true;
+
+    try {
+        const response = await fetch("/api/messages", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                initData: initData,
+                after_id: latestMessageId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+            throw new Error(data.error || "Ошибка получения сообщений");
+        }
+
+        const messages = data.messages || [];
+
+        if (messages.length > 0) {
+            messages.forEach(message => {
+                addBubble(
+                    message.text,
+                    "admin",
+                    message.created_at,
+                    message.id
+                );
+
+                latestMessageId = Math.max(
+                    latestMessageId,
+                    Number(message.id)
+                );
+            });
+
+            if (currentPage === "chat") {
+                markRepliesAsRead();
+                vibrate("success");
+            } else {
+                unreadCount += messages.length;
+                updateUnreadBadge();
+
+                document.getElementById("replyNotice").classList.add("show");
+
+                showToast("💌 Егор ответил тебе!");
+                vibrate("success");
+            }
+        }
+
+    } catch (error) {
+        console.log("Reply check:", error.message);
+
+    } finally {
+        pollingBusy = false;
+    }
+}
+
+
+// =====================================================
+// UNREAD COUNTER
+// =====================================================
+
+function updateUnreadBadge() {
+    const badge = document.getElementById("chatBadge");
+
+    if (unreadCount > 0) {
+        badge.style.display = "block";
+        badge.textContent = unreadCount > 9 ? "9+" : unreadCount;
+    } else {
+        badge.style.display = "none";
+    }
 }
 
 function markRepliesAsRead() {
-  unreadReplies = 0;
-  updateReplyBadge();
+    unreadCount = 0;
+
+    updateUnreadBadge();
+
+    document.getElementById("replyNotice").classList.remove("show");
+
+    // Запоминаем ID последнего ответа Егора.
+    // При следующем открытии приложения счётчик не сбросится ошибочно.
+    saveLastSeen();
 }
 
-function openLatestReply() {
-  showPage('chat');
+function saveLastSeen() {
+    const adminBubbles = Array.from(
+        document.querySelectorAll(".message.admin[data-message-id]")
+    );
 
-  const box = document.getElementById('chatBox');
+    if (adminBubbles.length) {
+        const ids = adminBubbles.map(
+            bubble => Number(bubble.dataset.messageId || 0)
+        );
 
-  box.scrollTo({
-    top:box.scrollHeight,
-    behavior:'smooth'
-  });
+        lastSeenReplyId = Math.max(lastSeenReplyId, ...ids);
+
+        try {
+            localStorage.setItem(userStorageKey, String(lastSeenReplyId));
+        } catch (e) {}
+    }
 }
+
+
+// =====================================================
+// SEND MESSAGE
+// =====================================================
 
 async function sendMessage() {
-  const input = document.getElementById('chatMessage');
-  const button = document.getElementById('sendButton');
-  const status = document.getElementById('chatStatus');
+    if (isSending) return;
 
-  const text = input.value.trim();
+    const input = document.getElementById("chatMessage");
+    const button = document.getElementById("sendButton");
+    const status = document.getElementById("chatStatus");
 
-  if (!text) {
-    toast('Напиши сообщение ❤️');
-    return;
-  }
+    const text = input.value.trim();
 
-  if (!initData) {
-    toast('Открой приложение через Telegram ❤️');
-    return;
-  }
-
-  if (sending) return;
-
-  sending = true;
-  button.disabled = true;
-  status.textContent = 'Отправляем сообщение... ✨';
-
-  try {
-    const response = await fetch('/api/message',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({initData,text})
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || 'Ошибка отправки');
+    if (!text) {
+        showToast("Напиши что-нибудь ❤️");
+        return;
     }
 
-    addBubble(text,'user');
-
-    input.value = '';
-
-    status.textContent = 'Сообщение доставлено Егору ❤️';
-
-    toast('Сообщение отправлено 💌');
-
-    if (tg?.HapticFeedback) {
-      tg.HapticFeedback.impactOccurred('light');
+    if (!initData) {
+        showToast("Открой приложение через Telegram");
+        return;
     }
 
-  } catch (error) {
-    status.textContent = error.message;
-    toast(error.message);
+    isSending = true;
+    button.disabled = true;
+    button.textContent = "…";
+    status.textContent = "Отправляем сообщение...";
 
-  } finally {
-    sending = false;
-    button.disabled = false;
-  }
-}
+    try {
+        const response = await fetch("/api/message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                initData: initData,
+                text: text
+            })
+        });
 
-async function loadReplies(showNotification = true) {
-  if (!initData || checkingReplies) return;
+        const data = await response.json();
 
-  checkingReplies = true;
+        if (!response.ok || !data.ok) {
+            throw new Error(data.error || "Не удалось отправить сообщение");
+        }
 
-  try {
-    const response = await fetch('/api/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        initData,
-        after_id:lastReplyId
-      })
-    });
+        input.value = "";
+        input.style.height = "44px";
 
-    const result = await response.json();
-
-    if (!response.ok || !result.ok) return;
-
-    const newMessages = result.messages || [];
-
-    if (newMessages.length > 0) {
-
-      newMessages.forEach(message => {
-        addBubble(message.text,'admin',message.id);
-
-        lastReplyId = Math.max(
-          lastReplyId,
-          Number(message.id) || 0
+        addBubble(
+            text,
+            "user",
+            Math.floor(Date.now() / 1000),
+            data.id
         );
-      });
 
-      const chatIsOpen =
-        document.getElementById('chat').classList.contains('active');
+        latestMessageId = Math.max(
+            latestMessageId,
+            Number(data.id || 0)
+        );
 
-      if (firstReplyCheck) {
-        firstReplyCheck = false;
+        status.textContent = "Сообщение доставлено Егору ❤️";
 
-      } else if (showNotification && !chatIsOpen) {
+        showToast("Сообщение отправлено ❤️");
+        vibrate("success");
 
-        unreadReplies += newMessages.length;
-        updateReplyBadge();
+    } catch (error) {
+        status.textContent = error.message;
+        showToast(error.message);
 
-        toast('💌 Егор ответил тебе!');
-
-        if (tg?.HapticFeedback) {
-          tg.HapticFeedback.notificationOccurred('success');
-        }
-
-      } else if (showNotification && chatIsOpen) {
-
-        toast('💚 Егор ответил тебе!');
-
-        if (tg?.HapticFeedback) {
-          tg.HapticFeedback.notificationOccurred('success');
-        }
-      }
+    } finally {
+        isSending = false;
+        button.disabled = false;
+        button.textContent = "➤";
     }
-
-    if (firstReplyCheck) {
-      firstReplyCheck = false;
-    }
-
-    if (document.getElementById('chat').classList.contains('active')) {
-      const box = document.getElementById('chatBox');
-      box.scrollTop = box.scrollHeight;
-    }
-
-  } catch (error) {
-    console.error('Reply loading error:',error);
-
-  } finally {
-    checkingReplies = false;
-  }
 }
 
-document.getElementById('chatMessage').addEventListener('keydown',function(event) {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault();
-    sendMessage();
-  }
+
+// =====================================================
+// TEXTAREA
+// =====================================================
+
+const messageInput = document.getElementById("chatMessage");
+
+messageInput.addEventListener("input", function() {
+    this.style.height = "44px";
+    this.style.height = Math.min(this.scrollHeight, 110) + "px";
 });
 
-let selectedMood = '';
+messageInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+});
 
-function selectMood(button,mood) {
-  document.querySelectorAll('.mood').forEach(item => {
-    item.classList.remove('selected');
-  });
 
-  button.classList.add('selected');
-  selectedMood = mood;
+// =====================================================
+// MOOD
+// =====================================================
 
-  if (tg?.HapticFeedback) {
-    tg.HapticFeedback.selectionChanged();
-  }
+function selectMood(button, mood) {
+    document.querySelectorAll(".mood-option").forEach(element => {
+        element.classList.remove("selected");
+    });
+
+    button.classList.add("selected");
+    selectedMood = mood;
 }
 
 function saveMood() {
-  if (!selectedMood) {
-    toast('Сначала выбери настроение ❤️');
-    return;
-  }
+    if (!selectedMood) {
+        showToast("Сначала выбери настроение 🌈");
+        return;
+    }
 
-  toast('Твоё настроение: ' + selectedMood + ' 💚');
+    try {
+        localStorage.setItem(
+            "support_mood",
+            JSON.stringify({
+                mood: selectedMood,
+                date: new Date().toISOString()
+            })
+        );
+    } catch (e) {}
+
+    showToast("Настроение сохранено 💗");
+    vibrate("success");
 }
 
-// Первый запрос загружает предыдущие ответы без уведомлений.
-loadReplies(false);
 
-// Проверяем новые ответы каждые пять секунд,
-// пока мини-приложение открыто.
-setInterval(() => {
-  loadReplies(true);
-},5000);
+// =====================================================
+// START
+// =====================================================
+
+async function startApp() {
+    if (!initData) {
+        console.log("Mini App initData is unavailable");
+        return;
+    }
+
+    await loadHistory();
+
+    // Проверяем ответы регулярно, пока приложение открыто.
+    setInterval(loadReplies, 5000);
+}
+
+startApp();
+
 </script>
+
 </body>
 </html>
