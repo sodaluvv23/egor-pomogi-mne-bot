@@ -6,6 +6,7 @@ import json
 import time
 import sqlite3
 import hashlib
+from contextlib import contextmanager
 from urllib.parse import parse_qsl
 
 import requests
@@ -17,19 +18,30 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 WEBHOOK_SECRET = os.environ["WEBHOOK_SECRET"]
 BASE_URL = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
-
-API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 DB_PATH = os.environ.get("DB_PATH", "messages.db")
 
+API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
-# -----------------------------
+
+# =====================================================
 # DATABASE
-# -----------------------------
+# =====================================================
 
+@contextmanager
 def get_db():
-    connection = sqlite3.connect(DB_PATH, timeout=20)
+    connection = sqlite3.connect(DB_PATH, timeout=30)
     connection.row_factory = sqlite3.Row
-    return connection
+
+    try:
+        connection.execute("PRAGMA busy_timeout = 30000")
+        connection.execute("PRAGMA journal_mode = WAL")
+        yield connection
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
 
 
 def init_db():
@@ -52,8 +64,6 @@ def init_db():
             )
         """)
 
-        # Миграция старой базы данных:
-        # добавляем поле source, если его ещё нет.
         columns = [
             row["name"]
             for row in db.execute(
@@ -67,16 +77,27 @@ def init_db():
                 ADD COLUMN source TEXT NOT NULL DEFAULT 'telegram'
             """)
 
+        db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_messages_user_id_id
+            ON messages (user_id, id)
+        """)
+
+        db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_messages_user_role
+            ON messages (user_id, role, id)
+        """)
+
 
 def save_message(user_id, role, text):
     with get_db() as db:
-        db.execute(
+        cursor = db.execute(
             """
             INSERT INTO messages (user_id, role, text, created_at)
             VALUES (?, ?, ?, ?)
             """,
             (user_id, role, text, int(time.time()))
         )
+        return cursor.lastrowid
 
 
 def save_reply_link(admin_message_id, user_id, source="telegram"):
@@ -111,11 +132,31 @@ def find_reply_link(admin_message_id):
     }
 
 
+def get_user_history(user_id, limit=500):
+    with get_db() as db:
+        rows = db.execute(
+            """
+            SELECT id, role, text, created_at
+            FROM (
+                SELECT id, role, text, created_at
+                FROM messages
+                WHERE user_id = ?
+                ORDER BY id DESC
+                LIMIT ?
+            )
+            ORDER BY id ASC
+            """,
+            (user_id, limit)
+        ).fetchall()
+
+    return [dict(row) for row in rows]
+
+
 def get_user_replies(user_id, after_id=0):
     with get_db() as db:
         rows = db.execute(
             """
-            SELECT id, text, created_at
+            SELECT id, role, text, created_at
             FROM messages
             WHERE user_id = ?
               AND role = 'admin'
@@ -129,9 +170,9 @@ def get_user_replies(user_id, after_id=0):
     return [dict(row) for row in rows]
 
 
-# -----------------------------
+# =====================================================
 # TELEGRAM API
-# -----------------------------
+# =====================================================
 
 def telegram(method, data):
     try:
@@ -141,6 +182,7 @@ def telegram(method, data):
             timeout=20
         )
         result = response.json()
+
     except Exception as error:
         raise RuntimeError(
             f"Telegram connection error: {type(error).__name__}"
@@ -169,9 +211,9 @@ def safe_send(chat_id, text):
         return None
 
 
-# -----------------------------
-# TELEGRAM MINI APP AUTH
-# -----------------------------
+# =====================================================
+# MINI APP AUTHENTICATION
+# =====================================================
 
 def validate_init_data(init_data):
     if not init_data:
@@ -213,7 +255,13 @@ def validate_init_data(init_data):
 
         auth_date = int(parsed.get("auth_date", "0"))
 
+        if auth_date <= 0:
+            return None
+
         if time.time() - auth_date > 86400:
+            return None
+
+        if auth_date > time.time() + 60:
             return None
 
         user_data = json.loads(parsed.get("user", "{}"))
@@ -228,9 +276,13 @@ def validate_init_data(init_data):
         return None
 
 
-# -----------------------------
+def get_authenticated_user(data):
+    return validate_init_data(data.get("initData", ""))
+
+
+# =====================================================
 # WEBHOOK SETUP
-# -----------------------------
+# =====================================================
 
 def setup_webhook():
     if not BASE_URL:
@@ -259,26 +311,31 @@ def setup_webhook():
         print(f"Telegram setup failed: {error}")
 
 
-# -----------------------------
+# =====================================================
 # WEBSITE
-# -----------------------------
+# =====================================================
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# -----------------------------
+@app.route("/health")
+def health():
+    return jsonify({
+        "ok": True,
+        "service": "Егор, помоги мне!"
+    })
+
+
+# =====================================================
 # MINI APP: SEND MESSAGE
-# -----------------------------
+# =====================================================
 
 @app.route("/api/message", methods=["POST"])
 def api_message():
     data = request.get_json(silent=True) or {}
-
-    user_id = validate_init_data(
-        data.get("initData", "")
-    )
+    user_id = get_authenticated_user(data)
 
     if not user_id:
         return jsonify({
@@ -300,8 +357,6 @@ def api_message():
             "error": "Сообщение слишком длинное"
         }), 400
 
-    save_message(user_id, "user", text)
-
     report = (
         "📩 НОВОЕ ОБРАЩЕНИЕ ИЗ MINI APP\n\n"
         f"🆔 ID: {user_id}\n"
@@ -317,32 +372,74 @@ def api_message():
             "error": "Не удалось доставить сообщение. Попробуй позже."
         }), 503
 
-    admin_message_id = result["result"]["message_id"]
+    try:
+        message_id = save_message(user_id, "user", text)
 
-    # Помечаем обращение как отправленное из приложения.
-    save_reply_link(
-        admin_message_id,
-        user_id,
-        source="app"
-    )
+        admin_message_id = result["result"]["message_id"]
+
+        save_reply_link(
+            admin_message_id,
+            user_id,
+            source="app"
+        )
+
+    except Exception as error:
+        print(f"Database save failed: {type(error).__name__}")
+
+        return jsonify({
+            "ok": False,
+            "error": "Сообщение отправлено, но не удалось сохранить его в истории."
+        }), 500
 
     return jsonify({
         "ok": True,
+        "id": message_id,
         "message": "Сообщение доставлено Егору ❤️"
     })
 
 
-# -----------------------------
-# MINI APP: GET REPLIES
-# -----------------------------
+# =====================================================
+# MINI APP: COMPLETE CHAT HISTORY
+# =====================================================
+
+@app.route("/api/history", methods=["POST"])
+def api_history():
+    data = request.get_json(silent=True) or {}
+    user_id = get_authenticated_user(data)
+
+    if not user_id:
+        return jsonify({
+            "ok": False,
+            "error": "Не удалось проверить Telegram"
+        }), 401
+
+    try:
+        messages = get_user_history(user_id)
+    except Exception as error:
+        print(f"History loading failed: {type(error).__name__}")
+
+        return jsonify({
+            "ok": False,
+            "error": "Не удалось загрузить историю переписки."
+        }), 500
+
+    latest_id = messages[-1]["id"] if messages else 0
+
+    return jsonify({
+        "ok": True,
+        "messages": messages,
+        "latest_id": latest_id
+    })
+
+
+# =====================================================
+# MINI APP: NEW ADMIN REPLIES
+# =====================================================
 
 @app.route("/api/messages", methods=["POST"])
 def api_messages():
     data = request.get_json(silent=True) or {}
-
-    user_id = validate_init_data(
-        data.get("initData", "")
-    )
+    user_id = get_authenticated_user(data)
 
     if not user_id:
         return jsonify({
@@ -363,9 +460,9 @@ def api_messages():
     })
 
 
-# -----------------------------
+# =====================================================
 # TELEGRAM WEBHOOK
-# -----------------------------
+# =====================================================
 
 @app.route("/webhook/<secret>", methods=["POST"])
 def webhook(secret):
@@ -395,9 +492,11 @@ def webhook(secret):
     if not user_id or not chat_id:
         return "OK", 200
 
-    # -------------------------
+    text = text.strip()
+
+    # -------------------------------------------------
     # ADMIN START
-    # -------------------------
+    # -------------------------------------------------
 
     if user_id == ADMIN_ID and text.startswith("/start"):
         safe_send(
@@ -410,9 +509,9 @@ def webhook(secret):
         )
         return "OK", 200
 
-    # -------------------------
+    # -------------------------------------------------
     # USER START
-    # -------------------------
+    # -------------------------------------------------
 
     if text.startswith("/start"):
         safe_send(
@@ -421,7 +520,8 @@ def webhook(secret):
             "Добро пожаловать в «Егор, помоги мне!».\n\n"
             "Здесь можно рассказать о том, что тебя тревожит, "
             "поделиться переживаниями или просто поговорить.\n\n"
-            "Егор прочитает твоё сообщение,поговорит с тобой и поможет.\n\n"
+            "Егор прочитает твоё сообщение, поговорит с тобой "
+            "и постарается поддержать.\n\n"
             "Можешь писать свободно. Твои сообщения увидит Егор.\n\n"
             "Это не профессиональная психологическая и не экстренная "
             "помощь. Если тебе угрожает опасность, обратись "
@@ -429,9 +529,9 @@ def webhook(secret):
         )
         return "OK", 200
 
-    # -------------------------
+    # -------------------------------------------------
     # ADMIN REPLY
-    # -------------------------
+    # -------------------------------------------------
 
     if user_id == ADMIN_ID:
         replied = message.get("reply_to_message")
@@ -447,8 +547,8 @@ def webhook(secret):
                 target_id = link["user_id"]
                 source = link["source"]
 
-            # Совместимость со старыми сообщениями,
-            # у которых не было сохранённой связи.
+            # Поддержка старых обращений,
+            # у которых ещё нет сохранённой связи.
             if not target_id:
                 original = (
                     replied.get("text")
@@ -467,23 +567,31 @@ def webhook(secret):
 
             if target_id:
                 if source == "app":
-                    # ВАЖНО:
-                    # Для Mini App не отправляем ответ
-                    # в личный Telegram пользователя.
-                    # Сохраняем его для чата приложения.
+                    # Сохраняем ответ в истории Mini App.
                     save_message(target_id, "admin", text)
+
+                    # Пытаемся уведомить человека в Telegram.
+                    # Если он не запускал бота, отправка может
+                    # не пройти — история приложения всё равно сохранится.
+                    notification = (
+                        "💌 Егор ответил тебе!\n\n"
+                        "Открой приложение «Егор, помоги мне!», "
+                        "чтобы прочитать ответ."
+                    )
+
+                    safe_send(target_id, notification)
 
                     print(
                         f"Mini App reply saved for user {target_id}"
                     )
 
                 else:
-                    # Обычные сообщения боту по-прежнему
-                    # получают ответы в Telegram.
+                    # Обычные обращения через Telegram.
                     result = safe_send(target_id, text)
 
                     if result:
                         save_message(target_id, "admin", text)
+
                         print(
                             f"Telegram reply delivered to {target_id}"
                         )
@@ -495,16 +603,16 @@ def webhook(secret):
 
         return "OK", 200
 
-    # -------------------------
+    # -------------------------------------------------
     # IGNORE COMMANDS
-    # -------------------------
+    # -------------------------------------------------
 
     if text.startswith("/"):
         return "OK", 200
 
-    # -------------------------
+    # -------------------------------------------------
     # ORDINARY TELEGRAM MESSAGE
-    # -------------------------
+    # -------------------------------------------------
 
     if text:
         name = sender.get("first_name", "Без имени")
@@ -552,9 +660,9 @@ def webhook(secret):
     return "OK", 200
 
 
-# -----------------------------
+# =====================================================
 # START
-# -----------------------------
+# =====================================================
 
 init_db()
 setup_webhook()
