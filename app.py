@@ -24,13 +24,11 @@ def telegram(method, data):
         result = response.json()
     except Exception as error:
         raise RuntimeError(
-            f"Telegram connection error: {type(error).__name__}"
+            f"Connection error: {type(error).__name__}"
         ) from None
 
     if not result.get("ok"):
-        raise RuntimeError(
-            f"Telegram API error: {result.get('description', 'Unknown error')}"
-        )
+        raise RuntimeError(result.get("description", "Telegram error"))
 
     return result
 
@@ -52,22 +50,22 @@ def safe_send(chat_id, text):
 
 def setup_webhook():
     if not BASE_URL:
-        print("RENDER_EXTERNAL_URL is missing")
+        print("Missing Render URL")
         return
 
     try:
-        result = telegram("setWebhook", {
+        telegram("setWebhook", {
             "url": f"{BASE_URL}/webhook/{WEBHOOK_SECRET}",
             "secret_token": WEBHOOK_SECRET
         })
-        print("Webhook configured:", result.get("ok"))
+        print("Webhook configured")
     except Exception as error:
         print(f"Webhook setup failed: {error}")
 
 
 @app.route("/")
 def home():
-    return "Егор, помоги мне! — бот работает."
+    return "Бот работает."
 
 
 @app.route("/webhook/<secret>", methods=["POST"])
@@ -90,44 +88,37 @@ def webhook(secret):
     sender = message.get("from", {})
     user_id = sender.get("id")
     chat_id = message.get("chat", {}).get("id")
-
     text = message.get("text") or message.get("caption") or ""
 
     if not user_id or not chat_id:
         return "OK", 200
 
-    # Команда /start от владельца бота
+    # Запуск бота владельцем
     if user_id == ADMIN_ID and text.startswith("/start"):
         safe_send(
             chat_id,
-            "Привет, Егор! ❤️\n\n"
-            "Бот «Егор, помоги мне!» запущен.\n"
-            "Сюда будут приходить сообщения пользователей.\n\n"
-            "Чтобы ответить человеку, нажми «Ответить» "
-            "на его сообщении и напиши свой ответ."
+            "Бот запущен. Все новые обращения будут приходить сюда."
         )
         return "OK", 200
 
-    # Команда /start от пользователя
+    # Запуск бота пользователем
     if text.startswith("/start"):
         safe_send(
             chat_id,
-            "Привет! ❤️\n\n"
-            "Это бот «Егор, помоги мне!».\n\n"
-            "Здесь ты можешь поделиться тем, что тебя тревожит, "
-            "рассказать о проблеме или просто поговорить.\n\n"
-            "Твоё сообщение прочитает Егор и постарается тебя поддержать.\n\n"
-            "Важно: это не профессиональная психологическая "
-            "и не экстренная помощь. При непосредственной опасности "
-            "обратись в местную экстренную службу или к человеку, "
-            "которому доверяешь.\n\n"
-            "Сообщения читает Егор. Не отправляй пароли "
+            "Привет.\n\n"
+            "Это личный бот Егора.\n\n"
+            "Можешь написать сюда о том, что тебя беспокоит, "
+            "рассказать о своей ситуации или просто поговорить.\n\n"
+            "Егор прочитает сообщение и ответит, когда сможет.\n\n"
+            "Твои сообщения увидит Егор. Не отправляй пароли "
             "и другие секретные данные.\n\n"
-            "Можешь написать свою историю прямо сюда."
+            "Если тебе угрожает непосредственная опасность, "
+            "обратись в экстренную службу или к человеку, "
+            "которому доверяешь."
         )
         return "OK", 200
 
-    # Обработка ответов Егора
+    # Ответ Егора пользователю
     if user_id == ADMIN_ID:
         replied = message.get("reply_to_message")
 
@@ -141,57 +132,41 @@ def webhook(secret):
 
             if match:
                 target_id = int(match.group(1))
-
-                result = safe_send(
-                    target_id,
-                    "Егор отвечает:\n\n" + text
-                )
-
-                if result:
-                    safe_send(ADMIN_ID, "Ответ отправлен ❤️")
-                else:
-                    safe_send(
-                        ADMIN_ID,
-                        "Не удалось доставить ответ. "
-                        "Возможно, пользователь заблокировал бота."
-                    )
+                safe_send(target_id, text)
 
         return "OK", 200
 
-    # Не обрабатываем другие команды
+    # Игнорируем команды
     if text.startswith("/"):
         return "OK", 200
 
-    # Пересылка сообщения владельцу
+    # Получаем обращение
     if text:
         name = sender.get("first_name", "Без имени")
         username = sender.get("username")
+
         username_text = f"@{username}" if username else "не указан"
 
         report = (
-            "📩 НОВОЕ ОБРАЩЕНИЕ\n"
+            f"ID: {user_id}\n"
             f"Имя: {name}\n"
             f"Username: {username_text}\n"
-            f"ID: {user_id}\n\n"
+            "--------------------\n\n"
             f"{text}"
         )
 
         result = safe_send(ADMIN_ID, report)
 
-        if result:
-            safe_send(chat_id, "Твоё сообщение отправлено Егору ❤️")
-        else:
+        if not result:
             safe_send(
                 chat_id,
-                "Не удалось доставить сообщение. "
-                "Попробуй написать немного позже."
+                "Не удалось доставить сообщение. Попробуй позже."
             )
 
     else:
         safe_send(
             chat_id,
-            "Пока я принимаю только текстовые сообщения. "
-            "Фото и голосовые добавим позже."
+            "Пока можно отправлять только текстовые сообщения."
         )
 
     return "OK", 200
