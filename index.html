@@ -1,1 +1,572 @@
 templates/index.html
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Егор, помоги мне ❤️</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f7f4ee;
+            color: #484b42;
+            min-height: 100vh;
+        }
+
+        .app {
+            max-width: 520px;
+            margin: auto;
+            padding: 24px 18px 100px;
+        }
+
+        .header {
+            padding: 16px 4px 24px;
+        }
+
+        .logo {
+            font-size: 13px;
+            color: #84917c;
+            margin-bottom: 13px;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-size: 29px;
+            line-height: 1.2;
+            color: #596b54;
+            margin-bottom: 9px;
+        }
+
+        .subtitle {
+            color: #898a80;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .welcome {
+            background: #e8ede3;
+            padding: 23px;
+            border-radius: 22px;
+            margin-bottom: 22px;
+        }
+
+        .welcome h2 {
+            font-size: 21px;
+            margin-bottom: 9px;
+            color: #53664f;
+        }
+
+        .welcome p {
+            font-size: 14px;
+            line-height: 1.65;
+            color: #667360;
+        }
+
+        .section-title {
+            font-size: 17px;
+            margin: 25px 0 14px;
+            color: #596b54;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 19px;
+            padding: 19px 15px;
+            text-align: left;
+            min-height: 125px;
+            cursor: pointer;
+            transition: transform .15s;
+        }
+
+        .card:active {
+            transform: scale(.97);
+        }
+
+        .card .emoji {
+            font-size: 25px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .card strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .card span:last-child {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .green { background: #e5ebdf; color: #586c52; }
+        .pink { background: #f1e5df; color: #916e60; }
+        .purple { background: #e9e7ef; color: #716b85; }
+        .yellow { background: #f0ecd9; color: #85784e; }
+
+        .quote {
+            margin-top: 23px;
+            background: #fffefa;
+            padding: 20px;
+            border-radius: 18px;
+            color: #77786e;
+            font-size: 14px;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .back {
+            border: none;
+            background: transparent;
+            color: #71836a;
+            font-size: 14px;
+            padding: 10px 0 20px;
+            cursor: pointer;
+        }
+
+        .panel {
+            background: #fffefa;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .panel h2 {
+            color: #596b54;
+            margin-bottom: 12px;
+            font-size: 21px;
+        }
+
+        .panel p {
+            color: #77786e;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 135px;
+            border: 1px solid #e4e3da;
+            border-radius: 14px;
+            padding: 14px;
+            font: inherit;
+            font-size: 14px;
+            resize: vertical;
+            background: #fffefa;
+            color: #484b42;
+            outline: none;
+            margin-top: 15px;
+        }
+
+        textarea:focus {
+            border-color: #9aaa91;
+        }
+
+        .main-button {
+            width: 100%;
+            border: none;
+            background: #74886d;
+            color: white;
+            border-radius: 14px;
+            padding: 15px;
+            margin-top: 13px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .moods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .mood {
+            border: 1px solid #e9e6dd;
+            background: #faf9f4;
+            padding: 14px 5px;
+            border-radius: 14px;
+            cursor: pointer;
+            color: #66675e;
+        }
+
+        .mood span {
+            display: block;
+            font-size: 26px;
+            margin-bottom: 7px;
+        }
+
+        .mood.selected {
+            border: 2px solid #84977c;
+            background: #e9eee5;
+        }
+
+        .bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fffefa;
+            border-top: 1px solid #eeece4;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 5px calc(12px + env(safe-area-inset-bottom));
+            z-index: 10;
+        }
+
+        .bottom button {
+            background: none;
+            border: none;
+            color: #99998f;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .bottom button span {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .bottom button.active {
+            color: #71866a;
+            font-weight: 700;
+        }
+
+        .notice {
+            font-size: 12px;
+            color: #99998f;
+            line-height: 1.6;
+            margin-top: 15px;
+        }
+
+        .toast {
+            display: none;
+            background: #e8ede3;
+            color: #53664f;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <section class="page active" id="home">
+        <div class="header">
+            <div class="logo">ТВОЁ ПРОСТРАНСТВО ❤️</div>
+            <h1>Егор, помоги мне</h1>
+            <p class="subtitle">Здесь можно быть собой. Без масок и притворства.</p>
+        </div>
+
+        <div class="welcome">
+            <h2>Привет! ❤️</h2>
+            <p>
+                Как ты сегодня? Необязательно быть в порядке,
+                чтобы поговорить. Иногда важно просто выговориться.
+            </p>
+        </div>
+
+        <h3 class="section-title">Чем займёмся?</h3>
+
+        <div class="grid">
+            <button class="card green" onclick="openPage('chat')">
+                <span class="emoji">💬</span>
+                <strong>Мой диалог</strong>
+                <span>Поговорить с Егором</span>
+            </button>
+
+            <button class="card pink" onclick="openPage('mood')">
+                <span class="emoji">🌿</span>
+                <strong>Настроение</strong>
+                <span>Разобраться в своих чувствах</span>
+            </button>
+
+            <button class="card purple" onclick="openPage('anonymous')">
+                <span class="emoji">🤍</span>
+                <strong>Анонимно</strong>
+                <span>Рассказать без имени</span>
+            </button>
+
+            <button class="card yellow" onclick="openPage('help')">
+                <span class="emoji">📖</span>
+                <strong>Полезное</strong>
+                <span>Мысли, материалы и упражнения</span>
+            </button>
+        </div>
+
+        <div class="quote">
+            «Тебе не обязательно справляться со всем в одиночку».
+        </div>
+
+        <div class="panel" onclick="openPage('about')" style="cursor:pointer">
+            <h2>❤️ О проекте</h2>
+            <p>Узнай, зачем появилось это пространство и кто за ним стоит.</p>
+        </div>
+    </section>
+
+    <section class="page" id="chat">
+        <button class="back" onclick="openPage('home')">← На главную</button>
+        <div class="panel">
+            <h2>Твой диалог 💬</h2>
+            <p>
+                Здесь ты можешь рассказать Егору о том,
+                что происходит в твоей жизни.
+            </p>
+            <textarea id="chatText" placeholder="Напиши, что у тебя на душе..."></textarea>
+            <button class="main-button" onclick="sendMessage('chatText', false)">
+                Отправить ❤️
+            </button>
+            <div class="toast" id="chatToast"></div>
+            <p class="notice">
+                Сообщение будет передано Егору. Ответ может прийти не сразу.
+            </p>
+        </div>
+    </section>
+
+    <section class="page" id="mood">
+        <button class="back" onclick="openPage('home')">← На главную</button>
+        <div class="panel">
+            <h2>Как ты себя чувствуешь? 🌿</h2>
+            <p>Выбери то, что ближе всего к твоему состоянию сегодня.</p>
+
+            <div class="moods">
+                <button class="mood" onclick="chooseMood(this,'Радостно')">
+                    <span>😊</span>Хорошо
+                </button>
+                <button class="mood" onclick="chooseMood(this,'Спокойно')">
+                    <span>😌</span>Спокойно
+                </button>
+                <button class="mood" onclick="chooseMood(this,'Грустно')">
+                    <span>😔</span>Грустно
+                </button>
+                <button class="mood" onclick="chooseMood(this,'Тревожно')">
+                    <span>😟</span>Тревожно
+                </button>
+                <button class="mood" onclick="chooseMood(this,'Злюсь')">
+                    <span>😠</span>Злюсь
+                </button>
+                <button class="mood" onclick="chooseMood(this,'Не понимаю')">
+                    <span>🥺</span>Не знаю
+                </button>
+            </div>
+
+            <textarea id="moodNote" placeholder="Хочешь записать, почему чувствуешь себя именно так?"></textarea>
+
+            <button class="main-button" onclick="saveMood()">
+                Сохранить запись 🌿
+            </button>
+
+            <div class="toast" id="moodToast"></div>
+            <p class="notice">
+                Пока это демонстрационный дневник: записи не сохраняются на сервере.
+            </p>
+        </div>
+    </section>
+
+    <section class="page" id="anonymous">
+        <button class="back" onclick="openPage('home')">← На главную</button>
+        <div class="panel">
+            <h2>Можешь рассказать 🤍</h2>
+            <p>
+                Напиши о том, что тебя беспокоит.
+                В этом разделе мы предусмотрим анонимную отправку.
+            </p>
+
+            <textarea id="anonymousText" placeholder="Твоя история..."></textarea>
+
+            <button class="main-button" onclick="sendMessage('anonymousText', true)">
+                Отправить анонимно 🤍
+            </button>
+
+            <div class="toast" id="anonymousToast"></div>
+
+            <p class="notice">
+                Важно: сейчас анонимный режим является демонстрационным.
+                Перед запуском мы отдельно настроим защиту личности
+                и объясним, какие данные видит администратор.
+            </p>
+        </div>
+    </section>
+
+    <section class="page" id="help">
+        <button class="back" onclick="openPage('home')">← На главную</button>
+        <div class="panel">
+            <h2>Немного поддержки 📖</h2>
+            <p>Несколько мыслей, которые иногда полезно услышать.</p>
+        </div>
+
+        <div class="panel">
+            <h2>Не торопи себя 🌱</h2>
+            <p>
+                Необязательно решить все проблемы сегодня.
+                Иногда достаточно сделать один маленький шаг.
+            </p>
+        </div>
+
+        <div class="panel">
+            <h2>Твои чувства имеют значение ❤️</h2>
+            <p>
+                Не нужно стыдиться грусти, страха или тревоги.
+                Ты имеешь право чувствовать то, что чувствуешь.
+            </p>
+        </div>
+
+        <div class="panel">
+            <h2>Попробуй небольшую паузу ☁️</h2>
+            <p>
+                Сделай несколько медленных вдохов, выпей воды
+                и ненадолго отложи то, что перегружает тебя.
+            </p>
+        </div>
+
+        <p class="notice">
+            Эти материалы не заменяют помощь психолога или врача.
+            При непосредственной опасности обратись в экстренную службу.
+        </p>
+    </section>
+
+    <section class="page" id="about">
+        <button class="back" onclick="openPage('home')">← На главную</button>
+        <div class="panel">
+            <h2>О проекте ❤️</h2>
+            <p>
+                «Егор, помоги мне!» — пространство,
+                в котором можно поделиться переживаниями,
+                рассказать о трудностях и быть услышанным.
+            </p>
+            <br>
+            <p>
+                Здесь не обещают решить все проблемы.
+                Здесь можно поговорить, получить поддержку
+                и попробовать разобраться в происходящем.
+            </p>
+            <br>
+            <p>
+                За проектом стоит Егор — человек,
+                который хочет уделять время чужим историям
+                и поддерживать людей добрым словом.
+            </p>
+        </div>
+    </section>
+
+</div>
+
+<nav class="bottom">
+    <button class="active" data-page="home" onclick="openPage('home')">
+        <span>⌂</span>Главная
+    </button>
+    <button data-page="chat" onclick="openPage('chat')">
+        <span>💬</span>Диалог
+    </button>
+    <button data-page="mood" onclick="openPage('mood')">
+        <span>🌿</span>Настроение
+    </button>
+    <button data-page="about" onclick="openPage('about')">
+        <span>❤️</span>О проекте
+    </button>
+</nav>
+
+<script>
+    const tg = window.Telegram?.WebApp;
+
+    if (tg) {
+        tg.ready();
+        tg.expand();
+    }
+
+    function openPage(page) {
+        document.querySelectorAll('.page').forEach(el => {
+            el.classList.remove('active');
+        });
+
+        document.getElementById(page).classList.add('active');
+
+        document.querySelectorAll('.bottom button').forEach(button => {
+            button.classList.toggle(
+                'active',
+                button.dataset.page === page
+            );
+        });
+
+        window.scrollTo(0, 0);
+    }
+
+    function showToast(id, message) {
+        const toast = document.getElementById(id);
+        toast.textContent = message;
+        toast.style.display = 'block';
+    }
+
+    function sendMessage(inputId, anonymous) {
+        const field = document.getElementById(inputId);
+        const message = field.value.trim();
+
+        if (!message) {
+            alert("Сначала напиши сообщение ❤️");
+            return;
+        }
+
+        // Подключим настоящую отправку на следующем этапе.
+        showToast(
+            anonymous ? "anonymousToast" : "chatToast",
+            "Интерфейс готов! Подключение отправки сделаем следующим шагом ❤️"
+        );
+    }
+
+    let selectedMood = "";
+
+    function chooseMood(element, mood) {
+        document.querySelectorAll('.mood').forEach(button => {
+            button.classList.remove('selected');
+        });
+
+        element.classList.add('selected');
+        selectedMood = mood;
+    }
+
+    function saveMood() {
+        if (!selectedMood) {
+            alert("Выбери своё настроение 🌿");
+            return;
+        }
+
+        showToast(
+            "moodToast",
+            "Настроение выбрано: " + selectedMood +
+            ". Сохранение в дневник подключим следующим шагом ❤️"
+        );
+    }
+</script>
+
+</body>
+</html>
